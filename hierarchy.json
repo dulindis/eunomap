@@ -7,7 +7,8 @@
     "Italian",
     "Chinese",
     "Swedish",
-    "English"
+    "English",
+    "ciekawostki jezykowe"
   ],
   "Health": {
     "Doctors": [
@@ -16,13 +17,15 @@
       "Dermatologist",
       "Psychiatrist",
       "Pediatrician",
-      "Endocrinologist"
+      "Endocrinologist",
+      "Surgeon"
     ],
     "Medication": ["Drugs", "Supplements", "Natural Remedies"],
     "Nutrition": ["Dieting", "Healthy Eating", "Superfoods"],
-    "Wellness": ["Holistic Health", "Longevity", "Well-Being"],
+    "Wellness": ["Longevity", "Wellbeing"],
     "Therapy": ["Physical Therapy", "Psychotherapy"],
-    "Mental Health": ["Anxiety", "Depression", "ADHD", "Stress"]
+    "Mental Health": ["Anxiety", "Depression", "ADHD", "Stress"],
+    "Body": ["Diseases", "Conditions"]
   },
   "Pets": [
     "Dogs",
@@ -31,7 +34,8 @@
     "Pet Care",
     "Animal Nutrition",
     "Training",
-    "Veterinarian"
+    "Veterinarian",
+    "Health"
   ],
   "Fitness": [
     "Workout",
@@ -50,7 +54,8 @@
     "Accessories",
     "Fashion",
     "Style",
-    "Inspiration"
+    "Inspiration",
+    "Trends"
   ],
   "Cosmetics": [
     "Makeup",
@@ -63,9 +68,10 @@
   "Travel": {
     "General": ["Tips & Tricks", "Itineraries", "Where to Eat"],
     "Places": ["Poland", "Europe", "Asia", "America"],
-    "Themes": ["Adventure", "Culture", "History"]
+    "Themes": ["Adventure", "Culture", "History"],
+    "Food": []
   },
-  "Arts & Crafts": [
+  "Art": [
     "Drawing",
     "Painting",
     "Music",
@@ -83,7 +89,8 @@
     "Books",
     "Podcasts",
     "Music",
-    "Streaming Services"
+    "Streaming Services",
+    "Newspapers"
   ],
   "Food": {
     "General": ["Cooking", "Recipes", "Baking"],

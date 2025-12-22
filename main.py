@@ -10,23 +10,16 @@ from sqlalchemy import text
 import models, schemas, database
 from utils import flatten_hierarchy, load_hierarchy, add_tags
 
-app = FastAPI()
-
 UPLOAD_DIR = Path("static/uploads")
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
-
 
 # --- STARTUP EVENT: Create tables & populate hierarchy ---
-# @app.onstart("startup")
-# async def on_startup():
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     with database.engine.connect() as conn:
         conn.execute(text("PRAGMA foreign_keys = ON;"))  # 🔥 KLUCZOWE
         conn.execute(text("PRAGMA journal_mode = WAL;"))
-        # conn.execute(text("PRAGMA journal_mode=WAL;"))
 
     DEV_RESET = os.getenv("RESET_DB", "false").lower() == "true"
 
@@ -35,12 +28,20 @@ async def lifespan(app: FastAPI):
     else:
         database.init_db()
 
+    # 🔹 Teraz tworzymy sesję
     db = database.SessionLocal()
     try:
         hierarchy = load_hierarchy("hierarchy.json")
         add_tags(hierarchy, db=db)
+        db.commit()
     finally:
         db.close()
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
+
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
 # --- DEPENDENCY: Database session per request ---
@@ -54,10 +55,6 @@ def get_db():
 
 @app.post("/notes/", response_model=schemas.NoteOut)
 def create_note(
-    # content: Optional[str] = Form(None),
-    # file: Optional[UploadFile] = File(None),
-    # tags: str = Form(""),
-    # db: Session = Depends(get_db),
     content: str = Form(""),
     tags: str = Form(""),
     file: UploadFile | None = File(None),
@@ -70,7 +67,6 @@ def create_note(
             detail="Note must contain text or an image.",
         )
 
-    # media_type = "text" if not file else "image"
     media_type = "image" if file else "text"
     note = models.Note(content=content, media_type=media_type)
 

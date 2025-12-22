@@ -17,8 +17,7 @@ class TagOut(BaseModel):
     name: str
 
     class Config:
-        # form_attributes = True
-        orm_mode = True  # Required for SQLAlchemy compatibility
+        orm_mode = True
 
 
 class NoteOut(BaseModel):
@@ -30,5 +29,4 @@ class NoteOut(BaseModel):
     tags: List[TagOut] = []
 
     class Config:
-        # form_attributes = True
         orm_mode = True

@@ -1,13 +1,13 @@
 import json
 import models
 from sqlalchemy.orm import Session
+import re
 
 
 # ----------------------------
 # Load hierarchy JSON
 # ----------------------------
 def load_hierarchy(file_path="hierarchy.json"):
-    """Load the JSON hierarchy from a file."""
     with open(file_path, "r", encoding="utf-8") as f:
         return json.load(f)
 
@@ -54,17 +54,12 @@ def build_flat_mapping(node):
 # Get suggestions for hierarchical autocomplete (future use)
 # ----------------------------
 def get_suggestions(selected_tags, current_input, flat_mapping):
-    """
-    Return a list of suggestions based on last selected tag and current input.
-    This is optional for flat autocomplete; useful for hierarchical scenarios.
-    """
     if selected_tags:
         last_tag = selected_tags[-1].lower()
         suggestions = flat_mapping.get(last_tag, list(flat_mapping.keys()))
     else:
         suggestions = list(flat_mapping.keys())
 
-    # Filter by current input and remove already selected
     return [
         s
         for s in suggestions
@@ -91,94 +86,30 @@ def flatten_hierarchy(topic_key, hierarchy):
 
 
 def normalize(name: str) -> str:
-    """Trim whitespace and force lowercase."""
-    return name.strip().lower()
+    name = name.strip().lower()
+    name = re.sub(r"\s+", "_", name)
+    name = re.sub(r"_+", "_", name)
+    return name
 
 
-# ----------------------------
-# Efficient Recursive Tag Insertion
-# ----------------------------
-# def add_tags(node, db: Session, parent=None):
-#     """
-#     Recursively add tags from a hierarchy dict to the database.
-#     Commits once at the end for efficiency.
-#     """
-#     # Cache existing tags to avoid duplicate queries
-#     existing_tags = {t.name.lower(): t for t in db.query(models.Tag).all()}
-
-#     def _add_node(sub_node, parent_tag=None):
-#         if isinstance(sub_node, dict):
-#             for key, value in sub_node.items():
-#                 tag_lower = normalize(key)
-
-#                 tag = existing_tags.get(tag_lower)
-#                 if not tag:
-#                     tag = models.Tag(name=tag_name, parent=parent_tag)
-#                     db.add(tag)
-#                     existing_tags[tag_lower] = tag  # add to cache
-
-#                 # Recursively add children
-#                 if isinstance(value, dict):
-#                     _add_node(value, parent_tag=tag)
-#                 elif isinstance(value, list):
-#                     for child_name in value:
-#                         child_lower = child_name.lower().strip()
-#                         child_tag = existing_tags.get(child_lower)
-#                         if not child_tag:
-#                             child_tag = models.Tag(name=child_name, parent=tag)
-#                             db.add(child_tag)
-#                             existing_tags[child_lower] = child_tag
-#         elif isinstance(sub_node, list):
-#             for child_name in sub_node:
-#                 child_lower = child_name.lower().strip()
-#                 child_tag = existing_tags.get(child_lower)
-#                 if not child_tag:
-#                     child_tag = models.Tag(name=child_name, parent=parent_tag)
-#                     db.add(child_tag)
-#                     existing_tags[child_lower] = child_tag
-
-#     _add_node(node, parent_tag=parent)
-#     db.commit()  # single commit at the end
+def _add_node(name, parent_tag=None, db=None):
+    # Sprawdź, czy tag istnieje
+    name = normalize(name)
+    tag = db.query(models.Tag).filter_by(name=name).first()
+    if not tag:
+        tag = models.Tag(name=name)
+        if parent_tag:
+            tag.parents.append(parent_tag)  # <-- dodanie relacji parent-child
+        db.add(tag)
+        db.flush()  # żeby mieć tag.id jeśli potrzebne
+    return tag
 
 
-def add_tags(node, db: Session, parent=None):
-    """
-    Recursively add tags from a hierarchy dict to the database.
-    - lowercase
-    - trimmed
-    - single commit
-    """
-    existing_tags = {t.name: t for t in db.query(models.Tag).all()}
-
-    def _add_node(sub_node, parent_tag=None):
-        if isinstance(sub_node, dict):
-            for key, value in sub_node.items():
-                name = normalize(key)
-
-                tag = existing_tags.get(name)
-                if not tag:
-                    tag = models.Tag(name=name, parent=parent_tag)
-                    db.add(tag)
-                    existing_tags[name] = tag
-
-                if isinstance(value, dict):
-                    _add_node(value, parent_tag=tag)
-                elif isinstance(value, list):
-                    for child in value:
-                        child_name = normalize(child)
-                        child_tag = existing_tags.get(child_name)
-                        if not child_tag:
-                            child_tag = models.Tag(name=child_name, parent=tag)
-                            db.add(child_tag)
-                            existing_tags[child_name] = child_tag
-
-        elif isinstance(sub_node, list):
-            for child in sub_node:
-                child_name = normalize(child)
-                if child_name not in existing_tags:
-                    child_tag = models.Tag(name=child_name, parent=parent_tag)
-                    db.add(child_tag)
-                    existing_tags[child_name] = child_tag
-
-    _add_node(node, parent_tag=parent)
-    db.commit()
+def add_tags(hierarchy, parent_tag=None, db=None):
+    if isinstance(hierarchy, dict):
+        for k, v in hierarchy.items():
+            tag = _add_node(k, parent_tag=parent_tag, db=db)
+            add_tags(v, parent_tag=tag, db=db)
+    elif isinstance(hierarchy, list):
+        for item in hierarchy:
+            _add_node(item, parent_tag=parent_tag, db=db)

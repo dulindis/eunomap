@@ -52,16 +52,9 @@ def clear_note_form():
     st.session_state.uploader_key += 1
 
 
-# Initialize session state
-# if "selected_tags" not in st.session_state:
-#     st.session_state.selected_tags = []
-
 st.title("📘 Personal Notes Manager")
 st.header("➕ Add a New Note")
 
-
-# if "content_input" not in st.session_state:
-#     st.session_state.content_input = ""
 
 content = st.text_area(
     "Content",
@@ -73,7 +66,6 @@ st.session_state.selected_tags = st_tags(
     label="Select tags",
     value=st.session_state.selected_tags,
     suggestions=[t for t in flat_tags if t not in st.session_state.selected_tags],
-    # key="tags_input",
     key=f"tags_input_{st.session_state.uploader_key}",
     maxtags=5,
 )
@@ -83,30 +75,9 @@ st.write("Selected tags:", st.session_state.selected_tags)
 image_file = st.file_uploader(
     "Attach an image (optional)",
     type=["png", "jpg", "jpeg"],
-    # key="image_input",
     key=f"image_input_{st.session_state.uploader_key}",
 )
 
-# if st.button(
-#     "Save Note"
-#     #  , on_click=clear_note_form
-# ):
-#     # Use selected tags from session state
-#     selected_tags = st.session_state.selected_tags
-#     data = {"content": content, "tags": ",".join(selected_tags)}
-#     if image_file:
-#         files = {"file": (image_file.name, image_file, "multipart/form-data")}
-#         r = requests.post(f"{API_URL}/notes/", data=data, files=files)
-#     else:
-#         # No file, just send form-data
-#         r = requests.post(f"{API_URL}/notes/", data=data)
-
-#     if r.status_code == 200:
-#         st.success(f"Note saved: {content}")
-#         clear_note_form()
-#         st.rerun()
-#     else:
-#         st.error(f"Failed to save note: {r.text}")
 
 if st.button("Save Note"):
     selected_tags = st.session_state.selected_tags

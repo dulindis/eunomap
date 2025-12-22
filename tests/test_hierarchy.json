@@ -1,0 +1,14 @@
+{
+  "Languages": ["English", "Spanish"],
+  "Health": {
+    "Doctors": ["Cardiologist", "Dermatologist"],
+    "Nutrition": ["Dieting", "Supplements"]
+  },
+  "Pets": ["Dogs", "Cats", "Health"],
+  "Fitness": ["Workout", "Yoga"],
+  "Travel": {
+    "Food": ["Restaurants", "Cafes"],
+    "Health": ["Travel Insurance"]
+  },
+  "Wellness": ["Meditation", "Mindfulness"]
+}

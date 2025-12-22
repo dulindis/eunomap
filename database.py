@@ -1,8 +1,6 @@
 from sqlalchemy import create_engine, event
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy import text
-
 
 # FOR LOCAL DEV: SQLite
 SQLALCHEMY_DATABASE_URL = "sqlite:///./app.db"
@@ -26,15 +24,6 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
 
-# Dependency to get DB session
-# def get_db():
-#     db = SessionLocal()
-#     try:
-#         yield db
-#     finally:
-#         db.close()
-
-
 def reset_db():
     from models import Note, Tag, note_tags
 
@@ -46,4 +35,5 @@ def init_db():
     # Import all models here so they are registered with Base
     from models import Note, Tag, note_tags
 
+    print("Creating tables if they don't exist...")
     Base.metadata.create_all(bind=engine)

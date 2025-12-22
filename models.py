@@ -30,13 +30,28 @@ class Note(Base):
     )
 
 
+tag_parents = Table(
+    "tag_parents",
+    Base.metadata,
+    Column("child_id", Integer, ForeignKey("tags.id", ondelete="CASCADE")),
+    Column("parent_id", Integer, ForeignKey("tags.id", ondelete="CASCADE")),
+)
+
+
 class Tag(Base):
     __tablename__ = "tags"
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, unique=True, index=True)
-    parent_id = Column(Integer, ForeignKey("tags.id"), nullable=True)
+    # parent_id = Column(Integer, ForeignKey("tags.id"), nullable=True)
 
     # Self-referential relationships
-    parent = relationship("Tag", remote_side=[id], backref="children")
+    # parent = relationship("Tag", remote_side=[id], backref="children")
+    parents = relationship(
+        "Tag",
+        secondary=tag_parents,
+        primaryjoin=id == tag_parents.c.child_id,
+        secondaryjoin=id == tag_parents.c.parent_id,
+        backref="children",
+    )
     notes = relationship("Note", secondary=note_tags, back_populates="tags")
