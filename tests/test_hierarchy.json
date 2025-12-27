@@ -2,13 +2,13 @@
   "Languages": ["English", "Spanish"],
   "Health": {
     "Doctors": ["Cardiologist", "Dermatologist"],
-    "Nutrition": ["Dieting", "Supplements"]
+    "Nutrition": ["Diet", "Supplements"]
   },
   "Pets": ["Dogs", "Cats", "Health"],
-  "Fitness": ["Workout", "Yoga"],
+  "Fitness": ["Workout", "Yoga", "Health"],
   "Travel": {
     "Food": ["Restaurants", "Cafes"],
     "Health": ["Travel Insurance"]
   },
-  "Wellness": ["Meditation", "Mindfulness"]
+  "Wellness": ["Meditation", "Mindfulness", " breathing Exercises "]
 }

@@ -1,41 +1,32 @@
-# import os
-# from sqlalchemy import create_engine, text
-# from sqlalchemy.orm import sessionmaker
-# from database import Base
-
-# # Use an in-memory SQLite database for tests
-# TEST_SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
-
-# engine = create_engine(
-#     TEST_SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
-# )
-# SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-# # Enable FK constraints in SQLite
-# with engine.connect() as conn:
-#     conn.execute(text("PRAGMA foreign_keys = ON"))
-#     conn.execute(text("PRAGMA journal_mode = WAL"))
-
-# # Create all tables
-# Base.metadata.create_all(bind=engine)
-
 import os
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
+import tempfile
 from database import Base
 
-# Use an in-memory SQLite database for tests
-TEST_SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
 
-engine = create_engine(
-    TEST_SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
-)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+def create_test_engine():
+    db_fd, db_path = tempfile.mkstemp(suffix=".sqlite")
+    os.close(db_fd)
 
-# Enable FK constraints in SQLite
-with engine.connect() as conn:
-    conn.execute(text("PRAGMA foreign_keys = ON"))
-    conn.execute(text("PRAGMA journal_mode = WAL"))
+    engine = create_engine(
+        f"sqlite:///{db_path}",
+        connect_args={"check_same_thread": False},
+        future=True,
+    )
 
-# Create all tables
-Base.metadata.create_all(bind=engine)
+    # SQLite pragmas
+    with engine.connect() as conn:
+        conn.execute(text("PRAGMA foreign_keys = ON"))
+
+    Base.metadata.create_all(bind=engine)
+    return engine, db_path
+
+
+def create_session(engine):
+    return sessionmaker(
+        autocommit=False,
+        autoflush=False,
+        bind=engine,
+        future=True,
+    )
