@@ -8,10 +8,67 @@ import shutil
 import os
 from sqlalchemy import text
 import models, schemas, database
-from utils import flatten_hierarchy, load_hierarchy, add_tags
+from utils import flatten_hierarchy, load_hierarchy, add_tags, normalize
 
 UPLOAD_DIR = Path("static/uploads")
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+
+
+# app = FastAPI()
+
+
+# --- DEPENDENCY: Database session per request ---
+def get_db():
+    db = database.SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+# --- HELPER: Get or create tag, auto-assign "others" if missing parent ---
+def get_or_create_tag(
+    db: Session, name: str, parent: models.Tag | None = None
+) -> models.Tag:
+    name = normalize(name)
+    tag = db.query(models.Tag).filter_by(name=name).first()
+    if not tag:
+        tag = models.Tag(name=name)
+        # Assign parent "others" if no parent provided
+        if parent is None and name != "others":
+            others_tag = db.query(models.Tag).filter_by(name="others").first()
+            if not others_tag:
+                others_tag = models.Tag(name="others")
+                db.add(others_tag)
+                db.flush()
+            tag.parents.append(others_tag)
+        elif parent:
+            tag.parents.append(parent)
+        db.add(tag)
+        db.flush()  # ensure tag.id is available
+    return tag
+
+
+# --- HELPER: Save uploaded file ---
+def save_upload(file: UploadFile, note_id: int) -> str:
+    ext = Path(file.filename).suffix.lower()
+    safe_filename = f"note_{note_id}{ext}"
+    file_path = UPLOAD_DIR / safe_filename
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+    return f"static/uploads/{safe_filename}"
+
+
+# @app.on_event("startup")
+# def startup():
+#     database.init_db()
+#     db = database.SessionLocal()
+#     try:
+#         hierarchy = load_hierarchy("hierarchy.json")
+#         add_tags(hierarchy, db=db)
+#         db.commit()
+#     finally:
+#         db.close()
 
 
 # --- STARTUP EVENT: Create tables & populate hierarchy ---
@@ -40,17 +97,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
-
 app.mount("/static", StaticFiles(directory="static"), name="static")
-
-
-# --- DEPENDENCY: Database session per request ---
-def get_db():
-    db = database.SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 @app.post("/notes/", response_model=schemas.NoteOut)
@@ -75,19 +122,20 @@ def create_note(
 
     # handle image
     if file:
-        ext = Path(file.filename).suffix.lower()
-        safe_filename = f"note_{note.id}{ext}"
-        file_path = UPLOAD_DIR / safe_filename
+        note.media_path = save_upload(file, note.id)
 
-        with open(file_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
+    # ext = Path(file.filename).suffix.lower()
+    # safe_filename = f"note_{note.id}{ext}"
+    # file_path = UPLOAD_DIR / safe_filename
 
-        note.media_path = f"static/uploads/{safe_filename}"
-        # ten flush
+    # with open(file_path, "wb") as buffer:
+    #     shutil.copyfileobj(file.file, buffer)
+
+    # note.media_path = f"static/uploads/{safe_filename}"
+    # ten flush
 
     # handle tags
     tag_list = [t.strip().lower() for t in tags.split(",") if t.strip()]
-
     for tag_name in tag_list:
         db_tag = db.query(models.Tag).filter_by(name=tag_name).first()
         if not db_tag:
@@ -100,72 +148,6 @@ def create_note(
     db.refresh(note)
 
     return note
-
-
-# @app.post("/notes/", response_model=schemas.NoteOut)
-# def create_note(
-#     content: Optional[str] = Form(None),
-#     file: Optional[UploadFile] = File(None),
-#     tags: str = Form(""),
-#     db: Session = Depends(get_db),
-# ):
-#     # 1. Create note
-#     media_type = "text" if not file else "image"
-#     note = models.Note(content=content, media_type=media_type)
-#     db.add(note)
-#     db.commit()
-#     db.refresh(note)
-
-#     # 2. Handle image if provided
-#     if file:
-#         ext = Path(file.filename).suffix.lower()
-#         safe_filename = f"note_{note.id}{ext}"
-#         file_path = UPLOAD_DIR / safe_filename
-
-#         with open(file_path, "wb") as buffer:
-#             shutil.copyfileobj(file.file, buffer)
-
-#         note.media_path = f"static/uploads/{safe_filename}"
-#         # note.media_type = "image"
-#         db.commit()
-#         db.refresh(note)
-
-#     # 3. Handle tags
-#     tag_list = [t.strip().lower() for t in tags.split(",") if t.strip()]
-#     for tag_name in tag_list:
-#         db_tag = db.query(models.Tag).filter_by(name=tag_name).first()
-#         if not db_tag:
-#             db_tag = models.Tag(name=tag_name)
-#             db.add(db_tag)
-#             db.flush()  # assign ID without committing
-#         note.tags.append(db_tag)
-#     db.commit()
-#     db.refresh(note)
-#     return note
-
-
-# --- ENDPOINT 1: Create Text Note ---
-# @app.post("/notes/", response_model=schemas.NoteOut)
-# def create_note(note: schemas.NoteCreate, db: Session = Depends(database.get_db)):
-#     # 1. Create the Note
-#     new_note = models.Note(content=note.content, media_type="text")
-#     # 2. Handle Tags
-#     for tag_name in note.tags:
-#         tag_name = tag_name.lower().strip()
-#         # Check if tag exists, if not create it
-#         db_tag = db.query(models.Tag).filter(models.Tag.name == tag_name).first()
-#         if not db_tag:
-#             db_tag = models.Tag(name=tag_name)
-#             db.add(db_tag)
-#             db.commit()  # Commit to get ID
-#             db.refresh(db_tag)
-
-#         new_note.tags.append(db_tag)
-
-#     db.add(new_note)
-#     db.commit()
-#     db.refresh(new_note)
-#     return new_note
 
 
 # --- ENDPOINT 2: Upload Image (Drag & Drop Handler) ---
@@ -321,3 +303,13 @@ def generate_wiki_page(topic: str, db: Session = Depends(get_db)):
             )
 
     return result
+
+
+def get_or_create_tag(db: Session, name: str) -> models.Tag:
+    name = normalize(name)
+    tag = db.query(models.Tag).filter_by(name=name).first()
+    if not tag:
+        tag = models.Tag(name=name)
+        db.add(tag)
+        db.flush()
+    return tag

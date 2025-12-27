@@ -230,5 +230,6 @@
     "painting"
   ],
   "Trivia": ["Fun Facts"],
-  "Events": ["Conferences", "Meetups", "Workshops", "Networking Events"]
+  "Events": ["Conferences", "Meetups", "Workshops", "Networking Events"],
+  "Others": []
 }

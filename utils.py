@@ -96,6 +96,20 @@ def _add_node(name, parent_tag=None, db=None):
     # Sprawdź, czy tag istnieje
     name = normalize(name)
     tag = db.query(models.Tag).filter_by(name=name).first()
+    # if not tag:
+    #     tag = models.Tag(name=name)
+    #     # Assign parent "Others" if no parent provided
+    #     if parent_tag is None:
+    #         others_tag = db.query(models.Tag).filter_by(name="others").first()
+    #         if not others_tag:
+    #             others_tag = models.Tag(name="others")
+    #             db.add(others_tag)
+    #             db.flush()
+    #         tag.parents.append(others_tag)
+    #     else:
+    #         tag.parents.append(parent_tag)
+    #     db.add(tag)
+    #     db.flush()
     if not tag:
         tag = models.Tag(name=name)
         if parent_tag:

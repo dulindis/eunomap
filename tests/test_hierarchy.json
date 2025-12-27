@@ -10,5 +10,6 @@
     "Food": ["Restaurants", "Cafes"],
     "Health": ["Travel Insurance"]
   },
-  "Wellness": ["Meditation", "Mindfulness", " breathing Exercises "]
+  "Wellness": ["Meditation", "Mindfulness", " breathing Exercises "],
+  "Others": []
 }
