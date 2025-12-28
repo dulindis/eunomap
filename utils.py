@@ -2,6 +2,9 @@ import json
 import models
 from sqlalchemy.orm import Session
 import re
+import inflect
+import unicodedata
+from models import Tag
 
 
 # ----------------------------
@@ -85,45 +88,141 @@ def flatten_hierarchy(topic_key, hierarchy):
     return flat_list
 
 
+_inflect = inflect.engine()
+
+DO_NOT_SINGULARIZE = {
+    "news",
+    "series",
+    "analytics",
+    "music",
+    "fitness",
+    "wellness",
+    "mindfulness",
+    "data",
+    "children",
+    "development",
+    "design",
+    "ai",
+    "ml",
+    "adhd",
+    "hiv",
+    "aids",
+    "covid-19",
+    "tips",
+    "tricks",
+    "others",
+    "tips_and_tricks",
+}
+
+# Explicit aliases for things that should unify
+ALIASES = {
+    "ai/ml": "ai_ml",
+    "c#": "csharp",
+    "node.js": "node_js",
+    "fruit_&_vegetables": "fruit_and_vegetables",
+    "meat_&_seafood": "meat_and_seafood",
+}
+
+
 def normalize(name: str) -> str:
+    if not name:
+        return ""
+    name = unicodedata.normalize("NFKC", name)
     name = name.strip().lower()
-    name = re.sub(r"\s+", "_", name)
+    name = name.replace("&", " and ")
+    name = name.replace("/", "_")
+    name = re.sub(r"[^\w\s-]", "", name)
+    name = re.sub(r"[\s\-]+", "_", name)
     name = re.sub(r"_+", "_", name)
+
+    if name in ALIASES:
+        return ALIASES[name]
+
+    parts = name.split("_")
+    last = parts[-1]
+
+    if last not in DO_NOT_SINGULARIZE:
+        singular = _inflect.singular_noun(last)
+        if singular:
+            parts[-1] = singular
+
+    name = "_".join(parts)
+
     return name
 
 
-def _add_node(name, parent_tag=None, db=None):
-    # Sprawdź, czy tag istnieje
+def _add_node(name, parent_tag=None, db=None, auto_others=True):
     name = normalize(name)
     tag = db.query(models.Tag).filter_by(name=name).first()
-    # if not tag:
-    #     tag = models.Tag(name=name)
-    #     # Assign parent "Others" if no parent provided
-    #     if parent_tag is None:
-    #         others_tag = db.query(models.Tag).filter_by(name="others").first()
-    #         if not others_tag:
-    #             others_tag = models.Tag(name="others")
-    #             db.add(others_tag)
-    #             db.flush()
-    #         tag.parents.append(others_tag)
-    #     else:
-    #         tag.parents.append(parent_tag)
-    #     db.add(tag)
-    #     db.flush()
+
     if not tag:
         tag = models.Tag(name=name)
         if parent_tag:
-            tag.parents.append(parent_tag)  # <-- dodanie relacji parent-child
+            tag.parents.append(parent_tag)
+        elif auto_others:
+            # fetch or create "others" tag
+            others_tag = db.query(models.Tag).filter_by(name="others").first()
+            if not others_tag:
+                others_tag = models.Tag(name="others")
+                db.add(others_tag)
+                db.flush()
+            tag.parents.append(others_tag)
         db.add(tag)
         db.flush()  # żeby mieć tag.id jeśli potrzebne
     return tag
 
 
-def add_tags(hierarchy, parent_tag=None, db=None):
+def get_or_create_tag(
+    db: Session, name: str, parent: Tag | None = None, auto_others: bool = True
+) -> Tag:
+    name = normalize(name)
+    tag = db.query(Tag).filter_by(name=name).first()
+    if tag:
+        return tag
+
+    tag = Tag(name=name)
+
+    if parent:
+        tag.parents.append(parent)
+    elif auto_others and name != "others":
+        # Only assign 'others' if allowed
+        others_tag = db.query(Tag).filter_by(name="others").first()
+        if not others_tag:
+            others_tag = Tag(name="others")
+            db.add(others_tag)
+            db.flush()
+        tag.parents.append(others_tag)
+
+    db.add(tag)
+    db.flush()
+    return tag
+    # name = normalize(name)
+    # tag = db.query(Tag).filter_by(name=name).first()
+    # if not tag:
+    #     tag = Tag(name=name)
+    #     if parent:
+    #         tag.parents.append(parent)
+    #     elif name != "others":
+    #         # parent to "Others"
+    #         others_tag = db.query(Tag).filter_by(name="others").first()
+    #         if not others_tag:
+    #             others_tag = Tag(name="others")
+    #             db.add(others_tag)
+    #             db.flush()
+    #         tag.parents.append(others_tag)
+    #     db.add(tag)
+    #     db.flush()  # ensure tag.id is available
+    # return tag
+
+
+def add_tags(hierarchy, parent_tag: Tag | None = None, db: Session = None):
     if isinstance(hierarchy, dict):
         for k, v in hierarchy.items():
-            tag = _add_node(k, parent_tag=parent_tag, db=db)
+            # tag = _add_node(k, parent_tag=parent_tag, db=db, auto_others=False)
+            tag = get_or_create_tag(db, k, parent=parent_tag, auto_others=False)
+
             add_tags(v, parent_tag=tag, db=db)
     elif isinstance(hierarchy, list):
         for item in hierarchy:
-            _add_node(item, parent_tag=parent_tag, db=db)
+            # _add_node(item, parent_tag=parent_tag, db=db, auto_others=False)
+            get_or_create_tag(db, item, parent=parent_tag, auto_others=False)

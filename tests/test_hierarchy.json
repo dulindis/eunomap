@@ -1,15 +1,18 @@
 {
   "Languages": ["English", "Spanish"],
   "Health": {
-    "Doctors": ["Cardiologist", "Dermatologist"],
-    "Nutrition": ["Diet", "Supplements"]
+    "Doctors": ["Cardiologists", "Dermatologist"],
+    "Nutrition": ["Diet", "Supplements", "covid-19"]
   },
   "Pets": ["Dogs", "Cats", "Health"],
   "Fitness": ["Workout", "Yoga", "Health"],
   "Travel": {
-    "Food": ["Restaurants", "Cafes"],
+    "Food": ["Restaurants", "Cafes", "Tips & Tricks"],
     "Health": ["Travel Insurance"]
   },
   "Wellness": ["Meditation", "Mindfulness", " breathing Exercises "],
+  "Technology": {
+    "General": ["Technology", "Web Development", "AI/ML", "Equipment", "C#"]
+  },
   "Others": []
 }

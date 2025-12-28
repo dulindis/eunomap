@@ -1,5 +1,5 @@
 {
-  "Languages": [
+  "Language": [
     "Spanish",
     "Portuguese",
     "French",
@@ -11,7 +11,7 @@
     "ciekawostki jezykowe"
   ],
   "Health": {
-    "Doctors": [
+    "Doctor": [
       "Cardiologist",
       "Neurologist",
       "Dermatologist",
@@ -20,8 +20,8 @@
       "Endocrinologist",
       "Surgeon"
     ],
-    "Medication": ["Drugs", "Supplements", "Natural Remedies"],
-    "Nutrition": ["Dieting", "Healthy Eating", "Superfoods"],
+    "Medication": ["Drug", "Supplement", "Natural Remedy"],
+    "Nutrition": ["Dieting", "Healthy Eating", "Superfood"],
     "Wellness": ["Longevity", "Wellbeing"],
     "Therapy": ["Physical Therapy", "Psychotherapy"],
     "Mental Health": ["Anxiety", "Depression", "ADHD", "Stress"],
@@ -32,6 +32,7 @@
       "Ears",
       "Nose",
       "Mouth",
+      "Gums",
       "Teeth",
       "Neck",
       "Chest",
@@ -55,7 +56,8 @@
       "Knees",
       "Ankles",
       "Feet",
-      "Skin"
+      "Skin",
+      "Hormones"
     ],
     "Diseases": [
       "Diabetes",
@@ -76,7 +78,8 @@
       "Parkinson’s Disease",
       "Chronic Kidney Disease",
       "Liver Disease",
-      "HIV/AIDS"
+      "HIV/AIDS",
+      "Osteoporosis"
     ]
   },
   "Pets": [
@@ -115,11 +118,25 @@
     "Haircare",
     "Fragrance",
     "Beauty Tips",
-    "Product Reviews"
+    "Product Reviews",
+    "Tested",
+    "To Test",
+    "Favorite Products"
   ],
   "Travel": {
-    "General": ["Tips & Tricks", "Itineraries", "Where to Eat"],
-    "Places": ["Poland", "Europe", "Asia", "America"],
+    "General": ["Tips", "Itineraries", "Where to Eat", "Events", "Festivals"],
+    "Places": [
+      "Poland",
+      "Europe",
+      "Asia",
+      "south America",
+      "North America",
+      "Africa",
+      "Australia",
+      "Antarctica",
+      "Greenland",
+      "Monuments"
+    ],
     "Themes": ["Adventure", "Culture", "History"],
     "Food": []
   },
@@ -133,19 +150,26 @@
     "Photography",
     "Poetry",
     "Knitting",
-    "Sculpting"
+    "Sculpting",
+    "Design"
+
   ],
   "Media": [
-    "Movies",
-    "TV Shows",
-    "Books",
+    "Movie",
+    "TV Show",
+    "Book",
     "Podcasts",
     "Music",
     "Streaming Services",
-    "Newspapers"
+    "Newspaper",
+    "Music",
+    "Publishing",
+    "Author",
+    "Blog"
   ],
   "Food": {
-    "General": ["Cooking", "Recipes", "Baking"],
+    "Cooking": ["Baking", "Tips"],
+    "Recipes": ["Cakes", "Snacks", "Drinks"],
     "Ingredients": [
       "Interesting Products",
       "Fruit & Vegetables",
@@ -153,7 +177,7 @@
       "Cheeses",
       "Drinks"
     ],
-    "Dining": ["Restaurants", "Cuisines"]
+    "Dining": ["Restaurants", "Cafe"]
   },
   "Technology": {
     "General": [
@@ -163,7 +187,8 @@
       "Mobile Apps",
       "AI/ML",
       "Software Programs",
-      "Equipment"
+      "Equipment",
+      "Design"
     ],
     "Software Development": ["Programming Basics", "Algorithms", "DevOps"],
     "Programming Languages": [
@@ -231,5 +256,6 @@
   ],
   "Trivia": ["Fun Facts"],
   "Events": ["Conferences", "Meetups", "Workshops", "Networking Events"],
+
   "Others": []
 }

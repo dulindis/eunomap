@@ -8,7 +8,13 @@ import shutil
 import os
 from sqlalchemy import text
 import models, schemas, database
-from utils import flatten_hierarchy, load_hierarchy, add_tags, normalize
+from utils import (
+    flatten_hierarchy,
+    load_hierarchy,
+    add_tags,
+    normalize,
+    get_or_create_tag,
+)
 
 UPLOAD_DIR = Path("static/uploads")
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
@@ -27,26 +33,39 @@ def get_db():
 
 
 # --- HELPER: Get or create tag, auto-assign "others" if missing parent ---
-def get_or_create_tag(
-    db: Session, name: str, parent: models.Tag | None = None
-) -> models.Tag:
-    name = normalize(name)
-    tag = db.query(models.Tag).filter_by(name=name).first()
-    if not tag:
-        tag = models.Tag(name=name)
-        # Assign parent "others" if no parent provided
-        if parent is None and name != "others":
-            others_tag = db.query(models.Tag).filter_by(name="others").first()
-            if not others_tag:
-                others_tag = models.Tag(name="others")
-                db.add(others_tag)
-                db.flush()
-            tag.parents.append(others_tag)
-        elif parent:
-            tag.parents.append(parent)
-        db.add(tag)
-        db.flush()  # ensure tag.id is available
-    return tag
+# def get_or_create_tag(
+#     db: Session, name: str, parent: models.Tag | None = None
+# ) -> models.Tag:
+#     name = normalize(name)
+#     tag = db.query(models.Tag).filter_by(name=name).first()
+#     if not tag:
+#         tag = models.Tag(name=name)
+
+#         if parent:
+#             tag.parents.append(parent)
+
+#         elif name != "others":  # unknown top-level tag → attach to "others"
+#             others_tag = (
+#                 db.query(models.Tag).filter_by(name=normalize("others")).first()
+#             )
+#             if not others_tag:
+#                 others_tag = models.Tag(name=normalize("others"))
+#                 db.add(others_tag)
+#                 db.flush()
+#             tag.parents.append(others_tag)
+#         # Assign parent "others" if no parent provided
+#         # if parent is None and name != "others":
+#         #     others_tag = db.query(models.Tag).filter_by(name="others").first()
+#         #     if not others_tag:
+#         #         others_tag = models.Tag(name="others")
+#         #         db.add(others_tag)
+#         #         db.flush()
+#         #     tag.parents.append(others_tag)
+#         # elif parent:
+#         #     tag.parents.append(parent)
+#         db.add(tag)
+#         db.flush()  # ensure tag.id is available
+#     return tag
 
 
 # --- HELPER: Save uploaded file ---
@@ -182,18 +201,12 @@ def create_note(
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
         note.media_path = f"static/uploads/{safe_filename}"
-        # db.commit()
-        # db.refresh(note)
 
-    # Handle tags
+
     tag_list = [t.strip().lower() for t in tags.split(",") if t.strip()]
     for tag_name in tag_list:
-        db_tag = db.query(models.Tag).filter_by(name=tag_name).first()
-        if not db_tag:
-            db_tag = models.Tag(name=tag_name)
-            db.add(db_tag)
-            db.flush()  # assign ID without commit
-        note.tags.append(db_tag)
+        tag = get_or_create_tag(db, tag_name, parent="others",auto_others=True)
+        note.tags.append(tag)
 
     db.commit()
     db.refresh(note)
