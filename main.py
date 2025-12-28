@@ -32,42 +32,6 @@ def get_db():
         db.close()
 
 
-# --- HELPER: Get or create tag, auto-assign "others" if missing parent ---
-# def get_or_create_tag(
-#     db: Session, name: str, parent: models.Tag | None = None
-# ) -> models.Tag:
-#     name = normalize(name)
-#     tag = db.query(models.Tag).filter_by(name=name).first()
-#     if not tag:
-#         tag = models.Tag(name=name)
-
-#         if parent:
-#             tag.parents.append(parent)
-
-#         elif name != "others":  # unknown top-level tag → attach to "others"
-#             others_tag = (
-#                 db.query(models.Tag).filter_by(name=normalize("others")).first()
-#             )
-#             if not others_tag:
-#                 others_tag = models.Tag(name=normalize("others"))
-#                 db.add(others_tag)
-#                 db.flush()
-#             tag.parents.append(others_tag)
-#         # Assign parent "others" if no parent provided
-#         # if parent is None and name != "others":
-#         #     others_tag = db.query(models.Tag).filter_by(name="others").first()
-#         #     if not others_tag:
-#         #         others_tag = models.Tag(name="others")
-#         #         db.add(others_tag)
-#         #         db.flush()
-#         #     tag.parents.append(others_tag)
-#         # elif parent:
-#         #     tag.parents.append(parent)
-#         db.add(tag)
-#         db.flush()  # ensure tag.id is available
-#     return tag
-
-
 # --- HELPER: Save uploaded file ---
 def save_upload(file: UploadFile, note_id: int) -> str:
     ext = Path(file.filename).suffix.lower()
@@ -126,6 +90,7 @@ def create_note(
     file: UploadFile | None = File(None),
     db: Session = Depends(get_db),
 ):
+    print(f"=== CREATE NOTE CALLED: content={content}, tags={tags} ===")  # ← Add this
 
     if not content.strip() and not file:
         raise HTTPException(
@@ -143,24 +108,13 @@ def create_note(
     if file:
         note.media_path = save_upload(file, note.id)
 
-    # ext = Path(file.filename).suffix.lower()
-    # safe_filename = f"note_{note.id}{ext}"
-    # file_path = UPLOAD_DIR / safe_filename
-
-    # with open(file_path, "wb") as buffer:
-    #     shutil.copyfileobj(file.file, buffer)
-
-    # note.media_path = f"static/uploads/{safe_filename}"
-    # ten flush
-
-    # handle tags
+        # handle tags
     tag_list = [t.strip().lower() for t in tags.split(",") if t.strip()]
+    print(f"Processing tags: {tag_list}")  # Add this debug line
     for tag_name in tag_list:
-        db_tag = db.query(models.Tag).filter_by(name=tag_name).first()
-        if not db_tag:
-            db_tag = models.Tag(name=tag_name)
-            db.add(db_tag)
-            db.flush()
+        print(f"Calling get_or_create_tag for: {tag_name}")  # Add this debug line
+        db_tag = get_or_create_tag(db, tag_name)  # ← This line is critical!
+        print(f"Got tag back: {db_tag.name}")  # Add this debug line
         note.tags.append(db_tag)
 
     db.commit()
@@ -181,19 +135,14 @@ def create_note(
         raise HTTPException(
             status_code=400, detail="Either content or file is required."
         )
-    # 1. Create note FIRST
+
     media_type = "text" if not file else "image"
     note = models.Note(content=content, media_type=media_type)
     db.add(note)
-    # db.commit()
-    # db.refresh(note)
-    db.add(note)
-    db.flush()  # Assigns note.id for file handling
 
-    # 2. Build safe filename
-    # ext = Path(file.filename).suffix.lower()
-    # filename = f"note_{note.id}{ext}"
-    # file_path = UPLOAD_DIR / filename
+    db.add(note)
+    db.flush()
+
     if file:
         ext = Path(file.filename).suffix.lower()
         safe_filename = f"note_{note.id}{ext}"
@@ -202,10 +151,9 @@ def create_note(
             shutil.copyfileobj(file.file, buffer)
         note.media_path = f"static/uploads/{safe_filename}"
 
-
     tag_list = [t.strip().lower() for t in tags.split(",") if t.strip()]
     for tag_name in tag_list:
-        tag = get_or_create_tag(db, tag_name, parent="others",auto_others=True)
+        tag = get_or_create_tag(db, tag_name, auto_others=True)
         note.tags.append(tag)
 
     db.commit()
@@ -316,13 +264,3 @@ def generate_wiki_page(topic: str, db: Session = Depends(get_db)):
             )
 
     return result
-
-
-def get_or_create_tag(db: Session, name: str) -> models.Tag:
-    name = normalize(name)
-    tag = db.query(models.Tag).filter_by(name=name).first()
-    if not tag:
-        tag = models.Tag(name=name)
-        db.add(tag)
-        db.flush()
-    return tag

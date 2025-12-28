@@ -30,7 +30,6 @@ def test_tag_parent_child_relationships(populated_db):
     assert fitness.parents == [] or [p.name for p in fitness.parents] == ["others"]
 
 
-
 def test_note_creation(populated_db):
     note = Note(content="test entry", media_type="text")
     populated_db.add(note)
@@ -167,14 +166,6 @@ def test_create_note_text(client):
 
 
 def test_create_note_with_new_tag(populated_db, client):
-    # others_tag = populated_db.query(Tag).filter_by(name="others").first()
-    # if not others_tag:
-    #     others_tag = Tag(name="others")
-    #     populated_db.add(others_tag)
-    #     populated_db.commit()
-    #     populated_db.refresh(others_tag)
-
-    # --- Send POST request to create note ---
     response = client.post(
         "/notes/",
         data={"content": "Test note", "tags": "newtag"},
@@ -184,6 +175,8 @@ def test_create_note_with_new_tag(populated_db, client):
     data = response.json()
     note_id = data["id"]
 
+    populated_db.expire_all()
+
     # --- Check note in DB ---
     note = populated_db.query(Note).filter_by(id=note_id).first()
     assert note is not None
@@ -192,25 +185,21 @@ def test_create_note_with_new_tag(populated_db, client):
     # --- Check tag auto-created ---
     tag_name = normalize("newtag")
     tag = populated_db.query(Tag).filter_by(name=tag_name).first()
+    print("Tag:", tag)
+    print("Parents objects:", tag.parents)
+    print("Parent names:", [p.name for p in tag.parents])
+
+    rows = populated_db.execute(
+        select(tag_parents).where(tag_parents.c.child_id == tag.id)
+    ).all()
+    print("Parent association rows:", rows)
+
     assert tag is not None
     assert tag.name == tag_name
-    # if tag is None:
-    #     # This simulates the backend auto-create logic using your helper
-    #     tag = _add_node("newtag", db=populated_db, auto_others=True)
-    #     populated_db.commit()
-    #     populated_db.refresh(tag)
 
-    # assert tag is not None
-    # assert tag.name == "newtag"
-    # tag = populated_db.query(Tag).filter_by(name="newtag").first()
-    # assert tag is not None
-    # assert tag.name == "newtag"
-
-    # --- Check parent is "others" ---
     parents = [p.name for p in tag.parents]
     assert "others" in parents
 
-    # --- Check note-tag association ---
     assert tag in note.tags
 
     # --- Optional: cleanup ---

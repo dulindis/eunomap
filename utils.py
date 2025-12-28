@@ -176,43 +176,100 @@ def get_or_create_tag(
     db: Session, name: str, parent: Tag | None = None, auto_others: bool = True
 ) -> Tag:
     name = normalize(name)
+    print(f"get_or_create_tag called with: name={name}, auto_others={auto_others}")
+
     tag = db.query(Tag).filter_by(name=name).first()
     if tag:
+        print(f"Tag {name} already exists, returning it")
         return tag
 
+    print(f"Creating new tag: {name}")
     tag = Tag(name=name)
-
-    if parent:
-        tag.parents.append(parent)
-    elif auto_others and name != "others":
-        # Only assign 'others' if allowed
-        others_tag = db.query(Tag).filter_by(name="others").first()
-        if not others_tag:
-            others_tag = Tag(name="others")
-            db.add(others_tag)
-            db.flush()
-        tag.parents.append(others_tag)
-
     db.add(tag)
     db.flush()
+    print(f"Tag {name} created with id={tag.id}")
+
+    if parent:
+        print(f"Adding parent: {parent.name}")
+        tag.parents.append(parent)
+        db.flush()  # ← ADD THIS! Flush after appending parent
+
+    elif auto_others and name != "others":
+        print(f"Auto-adding 'others' as parent for {name}")
+        others_name = normalize("others")
+        others_tag = db.query(Tag).filter_by(name=others_name).first()
+        if not others_tag:
+            print("Creating 'others' tag")
+            others_tag = Tag(name=others_name)
+            db.add(others_tag)
+            db.flush()
+            print(f"'others' tag created with id={others_tag.id}")
+
+        print(f"Appending others_tag (id={others_tag.id}) to tag.parents")
+        tag.parents.append(others_tag)
+        db.flush()  # Already here - good!
+        print(f"After append, tag.parents = {tag.parents}")
+
+    db.refresh(tag)
+    print(f"Final tag.parents for {name}: {[p.name for p in tag.parents]}")
+
     return tag
-    # name = normalize(name)
-    # tag = db.query(Tag).filter_by(name=name).first()
-    # if not tag:
-    #     tag = Tag(name=name)
-    #     if parent:
-    #         tag.parents.append(parent)
-    #     elif name != "others":
-    #         # parent to "Others"
-    #         others_tag = db.query(Tag).filter_by(name="others").first()
-    #         if not others_tag:
-    #             others_tag = Tag(name="others")
-    #             db.add(others_tag)
-    #             db.flush()
-    #         tag.parents.append(others_tag)
-    #     db.add(tag)
-    #     db.flush()  # ensure tag.id is available
-    # return tag
+
+
+# def get_or_create_tag(
+#     db: Session, name: str, parent: Tag | None = None, auto_others: bool = True
+# ) -> Tag:
+#     name = normalize(name)
+#     print(f"get_or_create_tag called with: name={name}, auto_others={auto_others}")
+
+#     tag = db.query(Tag).filter_by(name=name).first()
+#     if tag:
+#         print(f"Tag {name} already exists, returning it")
+
+#         return tag
+
+#     print(f"Creating new tag: {name}")
+#     tag = Tag(name=name)
+#     db.add(tag)
+#     db.flush()
+#     print(f"Tag {name} created with id={tag.id}")
+
+#     if parent:
+#         print(f"Adding parent: {parent.name}")
+
+#         tag.parents.append(parent)
+#     elif auto_others and name != "others":
+#         print(f"Auto-adding 'others' as parent for {name}")
+
+#         # Only assign 'others' if allowed
+#         others_name = normalize("others")
+#         others_tag = db.query(Tag).filter_by(name=others_name).first()
+#         if not others_tag:
+#             print("Creating 'others' tag")
+
+#             others_tag = Tag(name=others_name)
+#             db.add(others_tag)
+#             db.flush()  # ensure ID exists for relationship
+#             print(f"'others' tag created with id={others_tag.id}")
+
+#         db.refresh(others_tag)
+#         # if not others_tag:
+#         #     others_tag = Tag(name="others")
+#         #     db.add(others_tag)
+#         #     db.flush()  # assign ID
+#         # else:
+#         #     db.refresh(others_tag)  # make sure ID is loaded
+#         print(f"Appending others_tag (id={others_tag.id}) to tag.parents")
+#         tag.parents.append(others_tag)
+#         db.flush()  # ← Make sure to flush after appending
+#         print(f"After append, tag.parents = {tag.parents}")
+
+#     # db.add(tag)
+#     # db.flush()  # assign tag.id and insert association
+#     db.refresh(tag)  # ensure tag.parents is populated
+#     print(f"Final tag.parents for {name}: {[p.name for p in tag.parents]}")
+
+#     return tag
 
 
 def add_tags(hierarchy, parent_tag: Tag | None = None, db: Session = None):
