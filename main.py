@@ -1,82 +1,60 @@
-from fastapi import FastAPI, Depends, UploadFile, File, Form, HTTPException
-from contextlib import asynccontextmanager
-from fastapi.staticfiles import StaticFiles
-from sqlalchemy.orm import Session
-from typing import List, Optional
-from pathlib import Path
-import shutil
 import os
+import shutil
+from contextlib import asynccontextmanager
+from pathlib import Path
+from typing import Optional
+
+from fastapi import Depends, FastAPI, File, Form, HTTPException, UploadFile
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy import text
-import models, schemas, database
+from sqlalchemy.orm import Session
+
+import database
+import models
+import schemas
+from database import get_db, init_db, reset_db
 from utils import (
     flatten_hierarchy,
-    load_hierarchy,
-    add_tags,
-    normalize,
     get_or_create_tag,
+    load_hierarchy,
+    save_upload,
 )
 
 UPLOAD_DIR = Path("static/uploads")
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 
-# app = FastAPI()
-
-
-# --- DEPENDENCY: Database session per request ---
-def get_db():
-    db = database.SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-
-# --- HELPER: Save uploaded file ---
-def save_upload(file: UploadFile, note_id: int) -> str:
-    ext = Path(file.filename).suffix.lower()
-    safe_filename = f"note_{note_id}{ext}"
-    file_path = UPLOAD_DIR / safe_filename
-    with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
-    return f"static/uploads/{safe_filename}"
-
-
-# @app.on_event("startup")
-# def startup():
-#     database.init_db()
-#     db = database.SessionLocal()
-#     try:
-#         hierarchy = load_hierarchy("hierarchy.json")
-#         add_tags(hierarchy, db=db)
-#         db.commit()
-#     finally:
-#         db.close()
-
-
-# --- STARTUP EVENT: Create tables & populate hierarchy ---
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    with database.engine.connect() as conn:
-        conn.execute(text("PRAGMA foreign_keys = ON;"))  # 🔥 KLUCZOWE
-        conn.execute(text("PRAGMA journal_mode = WAL;"))
+    """
+    Application lifespan manager.
+    Handles startup and shutdown events.
+    """
+    # Startup
+    print("🚀 Starting application...")
 
-    DEV_RESET = os.getenv("RESET_DB", "false").lower() == "true"
+    # Check if we should reset the database
+    should_reset = os.getenv("RESET_DB", "false").lower() == "true"
 
-    if DEV_RESET:
-        database.reset_db()
+    if should_reset:
+        print("⚠️  RESET_DB=true - Resetting database...")
+        reset_db()
     else:
-        database.init_db()
+        init_db()
 
-    # 🔹 Teraz tworzymy sesję
-    db = database.SessionLocal()
+    # Load hierarchy data
     try:
-        hierarchy = load_hierarchy("hierarchy.json")
-        add_tags(hierarchy, db=db)
-        db.commit()
-    finally:
-        db.close()
+        database.load_initial_data()
+    except Exception as e:
+        print(f"❌ Error loading hierarchy: {e}")
+
+    print("✓ Application ready")
+
     yield
+
+    # Shutdown
+    print("👋 Shutting down application...")
+    database.engine.dispose()
 
 
 app = FastAPI(lifespan=lifespan)
@@ -106,7 +84,7 @@ def create_note(
 
     # handle image
     if file:
-        note.media_path = save_upload(file, note.id)
+        note.media_path = save_upload(file, note.id, UPLOAD_DIR)
 
         # handle tags
     tag_list = [t.strip().lower() for t in tags.split(",") if t.strip()]

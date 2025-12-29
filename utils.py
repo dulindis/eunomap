@@ -1,10 +1,14 @@
 import json
+import shutil
+
+from fastapi import UploadFile
 import models
 from sqlalchemy.orm import Session
 import re
 import inflect
 import unicodedata
 from models import Tag
+from pathlib import Path
 
 
 # ----------------------------
@@ -176,100 +180,42 @@ def get_or_create_tag(
     db: Session, name: str, parent: Tag | None = None, auto_others: bool = True
 ) -> Tag:
     name = normalize(name)
-    print(f"get_or_create_tag called with: name={name}, auto_others={auto_others}")
 
     tag = db.query(Tag).filter_by(name=name).first()
     if tag:
-        print(f"Tag {name} already exists, returning it")
+        # Tag exists - check if we need to add a new parent relationship
+        if parent and parent not in tag.parents:
+            tag.parents.append(parent)
+            db.flush()
+        elif auto_others and name != "others":
+            # Check if 'others' is already a parent
+            others_name = normalize("others")
+            others_tag = db.query(Tag).filter_by(name=others_name).first()
+            if others_tag and others_tag not in tag.parents:
+                tag.parents.append(others_tag)
+                db.flush()
         return tag
 
-    print(f"Creating new tag: {name}")
+    # Tag doesn't exist - create it
     tag = Tag(name=name)
     db.add(tag)
     db.flush()
-    print(f"Tag {name} created with id={tag.id}")
 
     if parent:
-        print(f"Adding parent: {parent.name}")
         tag.parents.append(parent)
-        db.flush()  # ← ADD THIS! Flush after appending parent
-
+        db.flush()
     elif auto_others and name != "others":
-        print(f"Auto-adding 'others' as parent for {name}")
         others_name = normalize("others")
         others_tag = db.query(Tag).filter_by(name=others_name).first()
         if not others_tag:
-            print("Creating 'others' tag")
             others_tag = Tag(name=others_name)
             db.add(others_tag)
             db.flush()
-            print(f"'others' tag created with id={others_tag.id}")
-
-        print(f"Appending others_tag (id={others_tag.id}) to tag.parents")
         tag.parents.append(others_tag)
-        db.flush()  # Already here - good!
-        print(f"After append, tag.parents = {tag.parents}")
+        db.flush()
 
     db.refresh(tag)
-    print(f"Final tag.parents for {name}: {[p.name for p in tag.parents]}")
-
     return tag
-
-
-# def get_or_create_tag(
-#     db: Session, name: str, parent: Tag | None = None, auto_others: bool = True
-# ) -> Tag:
-#     name = normalize(name)
-#     print(f"get_or_create_tag called with: name={name}, auto_others={auto_others}")
-
-#     tag = db.query(Tag).filter_by(name=name).first()
-#     if tag:
-#         print(f"Tag {name} already exists, returning it")
-
-#         return tag
-
-#     print(f"Creating new tag: {name}")
-#     tag = Tag(name=name)
-#     db.add(tag)
-#     db.flush()
-#     print(f"Tag {name} created with id={tag.id}")
-
-#     if parent:
-#         print(f"Adding parent: {parent.name}")
-
-#         tag.parents.append(parent)
-#     elif auto_others and name != "others":
-#         print(f"Auto-adding 'others' as parent for {name}")
-
-#         # Only assign 'others' if allowed
-#         others_name = normalize("others")
-#         others_tag = db.query(Tag).filter_by(name=others_name).first()
-#         if not others_tag:
-#             print("Creating 'others' tag")
-
-#             others_tag = Tag(name=others_name)
-#             db.add(others_tag)
-#             db.flush()  # ensure ID exists for relationship
-#             print(f"'others' tag created with id={others_tag.id}")
-
-#         db.refresh(others_tag)
-#         # if not others_tag:
-#         #     others_tag = Tag(name="others")
-#         #     db.add(others_tag)
-#         #     db.flush()  # assign ID
-#         # else:
-#         #     db.refresh(others_tag)  # make sure ID is loaded
-#         print(f"Appending others_tag (id={others_tag.id}) to tag.parents")
-#         tag.parents.append(others_tag)
-#         db.flush()  # ← Make sure to flush after appending
-#         print(f"After append, tag.parents = {tag.parents}")
-
-#     # db.add(tag)
-#     # db.flush()  # assign tag.id and insert association
-#     db.refresh(tag)  # ensure tag.parents is populated
-#     print(f"Final tag.parents for {name}: {[p.name for p in tag.parents]}")
-
-#     return tag
 
 
 def add_tags(hierarchy, parent_tag: Tag | None = None, db: Session = None):
@@ -283,3 +229,12 @@ def add_tags(hierarchy, parent_tag: Tag | None = None, db: Session = None):
         for item in hierarchy:
             # _add_node(item, parent_tag=parent_tag, db=db, auto_others=False)
             get_or_create_tag(db, item, parent=parent_tag, auto_others=False)
+
+
+def save_upload(file: UploadFile, note_id: int, upload_dir: Path) -> str:
+    ext = Path(file.filename).suffix.lower()
+    safe_filename = f"note_{note_id}{ext}"
+    file_path = upload_dir / safe_filename
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+    return f"static/uploads/{safe_filename}"

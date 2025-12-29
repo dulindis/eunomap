@@ -1,14 +1,29 @@
 import os
 import pytest
-from tests.test_database import create_test_engine, create_session
-from main import app, get_db
 from fastapi.testclient import TestClient
 
+from main import app, get_db
+from tests.test_database import create_test_engine, create_session
 from utils import add_tags, load_hierarchy, normalize
 
 
+# =============================================================================
+# Database Fixtures
+# =============================================================================
 @pytest.fixture()
 def db():
+    """
+    Create a fresh test database session for each test.
+
+    Yields:
+        Session: SQLAlchemy session connected to temporary test database
+
+    Cleanup:
+        - Rolls back any changes
+        - Closes session
+        - Disposes engine
+        - Removes temporary database file
+    """
     engine, db_path = create_test_engine()
     SessionLocal = create_session(engine)
 
@@ -27,15 +42,56 @@ def db():
             os.remove(db_path)
 
 
+# =============================================================================
+# API Client Fixtures
+# =============================================================================
 @pytest.fixture()
 def client(db):
-    # Override the dependency
+    """
+    FastAPI TestClient with database dependency override.
+
+    Args:
+        db: Database session fixture
+
+    Yields:
+        TestClient: Configured test client for API requests
+    """
     app.dependency_overrides[get_db] = lambda: db
     yield TestClient(app)
+    app.dependency_overrides.clear()
+
+
+# =============================================================================
+# Test Data Fixtures
+# =============================================================================
+@pytest.fixture
+def test_hierarchy_path():
+    """Path to the test hierarchy JSON file."""
+    return "tests/test_hierarchy.json"
+
+
+@pytest.fixture
+def test_hierarchy(test_hierarchy_path):
+    """
+    Load test hierarchy data from JSON file.
+
+    Args:
+        test_hierarchy_path: Path to test hierarchy file
+
+    Returns:
+        dict: Hierarchy data structure
+    """
+    return load_hierarchy(test_hierarchy_path)
 
 
 @pytest.fixture
 def expected_tag_names():
+    """
+    Set of normalized tag names expected in test hierarchy.
+
+    Returns:
+        set: Normalized tag names from the test hierarchy
+    """
     raw_tags = [
         # top-level
         "Languages",
@@ -87,8 +143,17 @@ def expected_tag_names():
 
 
 @pytest.fixture
-def populated_db(db):
-    hierarchy_data = load_hierarchy("tests/test_hierarchy.json")
-    add_tags(hierarchy_data, db=db)
+def populated_db(db, test_hierarchy):
+    """
+    Database pre-populated with test hierarchy tags.
+
+    Args:
+        db: Clean database session
+        test_hierarchy: Test hierarchy data
+
+    Returns:
+        Session: Database session with test tags loaded
+    """
+    add_tags(test_hierarchy, db=db)
     db.commit()
     return db
