@@ -2,7 +2,8 @@ import os
 import pytest
 from fastapi.testclient import TestClient
 
-from main import app, get_db
+from main import app 
+from database import get_db
 from tests.test_database import create_test_engine, create_session
 from utils import add_tags, add_user, add_users, load_hierarchy, normalize, SAMPLE_USERS
 

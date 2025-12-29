@@ -1,3 +1,4 @@
+from unittest.mock import patch
 from sqlalchemy import select, func
 from utils import load_hierarchy, normalize, add_tags, get_or_create_tag
 from models import Tag, Note, note_tags, tag_parents
@@ -446,9 +447,14 @@ def test_debug_tag_creation(populated_db):
             print(f"  - '{name}' ({count} copies)")
 
 
-def test_add_user(populated_db):
+"""
+test_add_user: Directly manipulates the DB via SQLAlchemy ORM. 
+It does not touch the FastAPI endpoint. 
+Good for unit-testing ORM behavior, constraints, and relationships."""
+
+
+def test_add_user_to_db(populated_db):
     from models import User
-    from utils import add_user
 
     user = User(
         username="Ferrarinka",
@@ -477,3 +483,153 @@ def test_add_user(populated_db):
     except Exception as e:
         populated_db.rollback()
         assert "UNIQUE constraint" in str(e), "Duplicate username should raise an error"
+
+
+"""
+test_create_user_endpoint: Uses client.post(...) to simulate HTTP requests to your
+ /users/ endpoint. This is an integration test because it tests the API route and the
+   database together. 
+This is what you want for testing signup behavior.
+"""
+
+
+def test_create_user_endpoint(client, populated_db):
+    from models import User
+
+    # Step 1: Send a POST request to your "create user" endpoint
+    response = client.post(
+        "/users/",
+        json={
+            "username": "Ferrarinka",
+            "email": "test@example.com",
+            "password": "secret",
+        },
+    )
+
+    # Step 2: Check HTTP response
+    assert response.status_code == 200
+    data = response.json()
+    assert data["username"] == "Ferrarinka"
+    assert data["email"] == "test@example.com"
+
+    # Step 3: Verify user is really in the database
+    user_in_db = populated_db.query(User).filter_by(email="test@example.com").first()
+    assert user_in_db is not None
+    assert user_in_db.username == "Ferrarinka"
+
+
+def test_create_user_duplicate(client):
+    from models import User
+
+    client.post(
+        "/users/",
+        json={
+            "username": "Ferrarinka",
+            "email": "test@example.com",
+            "password": "secret",
+        },
+    )
+    response = client.post(
+        "/users/",
+        json={
+            "username": "Ferrarinka",
+            "email": "test@example.com",
+            "password": "secret",
+        },
+    )
+    assert response.status_code == 400
+    assert "already exists" in response.json()["detail"]
+
+
+def test_github_oauth(client, populated_db):
+    from models import User
+
+    # Patch GitHub API calls and the secret
+    with patch("httpx.post") as mock_post, patch("httpx.get") as mock_get, patch(
+        "main.Config.GITHUB_CLIENT_SECRET", "fake_secret"
+    ), patch(
+        "main.Config.GITHUB_CLIENT_ID", "fake_id"
+    ):  # patch client ID too if needed
+
+        # Mock responses
+        mock_post.return_value.json.return_value = {"access_token": "token123"}
+        mock_get.return_value.json.return_value = {
+            "login": "ghuser",
+            "email": "gh@example.com",
+        }
+
+        # Call the OAuth callback
+        response = client.get("/auth/github/callback?code=fakecode")
+
+        # Verify response
+        assert response.status_code == 200
+        data = response.json()
+        assert data["username"] == "ghuser"
+        assert data["email"] == "gh@example.com"
+
+        # Verify the user was created in the DB
+        user_in_db = populated_db.query(User).filter_by(email="gh@example.com").first()
+        assert user_in_db is not None
+        assert user_in_db.username == "ghuser"
+
+    # from models import User
+
+    # with patch("httpx.post") as mock_post, patch("httpx.get") as mock_get, patch(
+    #     "main.Config.GITHUB_CLIENT_SECRET", "fake_secret"
+    # ):
+    #     # Mock GitHub API responses
+    #     mock_post.return_value.json.return_value = {"access_token": "token123"}
+    #     mock_get.return_value.json.return_value = {
+    #         "login": "ghuser",
+    #         "email": "gh@example.com",
+    #     }
+
+    #     # Call the OAuth callback
+    #     response = client.get("/auth/github/callback?code=fakecode")
+
+    #     assert response.status_code == 200
+    #     data = response.json()
+    #     assert data["username"] == "ghuser"
+    #     assert data["email"] == "gh@example.com"
+    # with patch("httpx.post") as mock_post, patch("httpx.get") as mock_get:
+    #     mock_post.return_value.json.return_value = {"access_token": "token123"}
+    #     mock_get.return_value.json.return_value = {
+    #         "login": "ghuser",
+    #         "email": "gh@example.com",
+    #     }
+
+    #     response = client.get("/auth/github/callback?code=fakecode")
+    #     assert response.status_code == 200
+    #     assert response.json()["username"] == "ghuser"
+
+    #     user_in_db = populated_db.query(User).filter_by(email="gh@example.com").first()
+    #     assert user_in_db is not None
+
+
+def test_login_and_protected_endpoint(client, populated_db):
+    from models import User
+    from utils import hash_password
+
+    # Add test user
+    user = User(
+        username="testuser",
+        email="test@example.com",
+        password_hash=hash_password("secret"),
+    )
+    populated_db.add(user)
+    populated_db.commit()
+
+    # Login
+    response = client.post(
+        "/token", data={"username": "testuser", "password": "secret"}
+    )
+    assert response.status_code == 200
+    token = response.json()["access_token"]
+    assert token is not None
+
+    # Use token to access protected endpoint
+    response2 = client.post(
+        "/notes/protected", json={"content": "JWT Note"}, headers={"token": token}
+    )
+    assert response2.status_code == 200
+    assert response2.json()["content"] == "JWT Note"

@@ -37,16 +37,15 @@ class NoteOut(BaseModel):
 
 
 class UserCreate(BaseModel):
-    username: str = Field(..., min_length=3)
-    email: Optional[EmailStr]
-    password_hash: str
-    is_active: bool = True
+    username: str = Field(..., min_length=4)
+    email: EmailStr
+    password: str
 
 
 class UserOut(BaseModel):
     id: int
     username: str
-    email: Optional[str]
+    email: str
     is_active: bool
 
     class Config:

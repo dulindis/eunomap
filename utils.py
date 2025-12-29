@@ -3,6 +3,7 @@ import re
 import shutil
 import unicodedata
 from pathlib import Path
+from passlib.context import CryptContext
 
 import inflect
 from fastapi import UploadFile
@@ -396,3 +397,17 @@ def save_upload(file: UploadFile, note_id: int, upload_dir: Path) -> str:
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
     return f"static/uploads/{safe_filename}"
+
+
+# =============================================================================
+# Password Hashing Helper
+# =============================================================================
+pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
+
+
+def hash_password(password: str) -> str:
+    return pwd_context.hash(password)
+
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    return pwd_context.verify(plain_password, hashed_password)

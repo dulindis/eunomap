@@ -10,8 +10,8 @@ def create_test_engine():
     os.close(db_fd)
 
     engine = create_engine(
-        # f"sqlite:///{db_path}",
-        "sqlite:///:memory:",
+        f"sqlite:///{db_path}",
+        # "sqlite:///:memory:",
         connect_args={"check_same_thread": False},
         future=True,
     )

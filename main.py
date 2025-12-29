@@ -3,23 +3,30 @@ import shutil
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Optional
+import httpx
+
 
 from fastapi import Depends, FastAPI, File, Form, HTTPException, UploadFile, status
 from fastapi.staticfiles import StaticFiles
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from auth import create_access_token, verify_access_token
 from config import Config
 import database
-import models
-import schemas
+from models import Note, User, Tag
+from schemas import NoteCreate, NoteOut, UserCreate, UserOut
 from database import get_db, init_db, reset_db
+from dependencies import get_current_user
 from utils import (
     flatten_hierarchy,
     get_or_create_tag,
+    hash_password,
     load_hierarchy,
     save_upload,
     add_user,
+    verify_password,
 )
 
 UPLOAD_DIR = Path("static/uploads")
@@ -64,7 +71,7 @@ app = FastAPI(lifespan=lifespan)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
-@app.post("/notes/", response_model=schemas.NoteOut)
+@app.post("/notes/", response_model=NoteOut)
 def create_note(
     content: str = Form(""),
     tags: str = Form(""),
@@ -80,7 +87,7 @@ def create_note(
         )
 
     media_type = "image" if file else "text"
-    note = models.Note(content=content, media_type=media_type)
+    note = Note(content=content, media_type=media_type)
 
     db.add(note)
     db.flush()
@@ -105,7 +112,7 @@ def create_note(
 
 
 # --- ENDPOINT 2: Upload Image (Drag & Drop Handler) ---
-@app.post("/notes/", response_model=schemas.NoteOut)
+@app.post("/notes/", response_model=NoteOut)
 def create_note(
     content: Optional[str] = Form(None),
     file: Optional[UploadFile] = File(None),
@@ -118,7 +125,7 @@ def create_note(
         )
 
     media_type = "text" if not file else "image"
-    note = models.Note(content=content, media_type=media_type)
+    note = Note(content=content, media_type=media_type)
     db.add(note)
 
     db.add(note)
@@ -150,7 +157,7 @@ def upload_image(
     db: Session = Depends(get_db),
 ):
     ext = Path(file.filename).suffix.lower()
-    note = models.Note(media_type="image")
+    note = Note(media_type="image")
     db.add(note)
     db.commit()
     db.refresh(note)
@@ -165,9 +172,9 @@ def upload_image(
     # Handle tags
     tag_list = [t.strip().lower() for t in tags.split(",") if t.strip()]
     for tag_name in tag_list:
-        db_tag = db.query(models.Tag).filter_by(name=tag_name).first()
+        db_tag = db.query(Tag).filter_by(name=tag_name).first()
         if not db_tag:
-            db_tag = models.Tag(name=tag_name)
+            db_tag = Tag(name=tag_name)
             db.add(db_tag)
             db.flush()
         note.tags.append(db_tag)
@@ -211,9 +218,9 @@ def generate_wiki_page(topic: str, db: Session = Depends(get_db)):
     relevant_tags = [topic] + subsections
 
     notes = (
-        db.query(models.Note)
-        .join(models.Note.tags)
-        .filter(models.Tag.name.in_(relevant_tags))
+        db.query(Note)
+        .join(Note.tags)
+        .filter(Tag.name.in_(relevant_tags))
         .distinct()
         .all()
     )
@@ -247,18 +254,38 @@ def generate_wiki_page(topic: str, db: Session = Depends(get_db)):
     return result
 
 
-@app.post("/users/", response_model=schemas.UserOut)
-def create_user(user_in: schemas.UserCreate, db: Session = Depends(get_db)):
+# --- Sign up with username/password ---
+@app.post("/users/", response_model=UserOut)
+def create_user(user: UserCreate, db: Session = Depends(get_db)):
+    existing_user = (
+        db.query(User)
+        .filter((User.username == user.username) | (User.email == user.email))
+        .first()
+    )
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Username or email already exists")
+
+    db_user = User(
+        username=user.username,
+        email=user.email,
+        password_hash=hash_password(user.password),
+    )
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+
+# create new user
+@app.post("/users/", response_model=UserOut)
+def create_user(user_in: UserCreate, db: Session = Depends(get_db)):
     # Check if username/email already exists
-    if db.query(models.User).filter(models.User.username == user_in.username).first():
+    if db.query(User).filter(User.username == user_in.username).first():
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Username already exists",
         )
-    if (
-        user_in.email
-        and db.query(models.User).filter(models.User.email == user_in.email).first()
-    ):
+    if user_in.email and db.query(User).filter(User.email == user_in.email).first():
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Email already exists",
@@ -273,3 +300,70 @@ def create_user(user_in: schemas.UserCreate, db: Session = Depends(get_db)):
         is_active=user_in.is_active,
     )
     return user
+
+
+@app.get("/auth/github/callback")
+def github_callback(code: str, db: Session = Depends(get_db)):
+    # Exchange code for access token
+    token_resp = httpx.post(
+        "https://github.com/login/oauth/access_token",
+        data={
+            "client_id": Config.GITHUB_CLIENT_ID,
+            "client_secret": Config.GITHUB_CLIENT_SECRET,
+            "code": code,
+        },
+        headers={"Accept": "application/json"},
+    ).json()
+
+    access_token = token_resp.get("access_token")
+    if not access_token:
+        raise HTTPException(status_code=400, detail="GitHub auth failed")
+
+    # Get user info from GitHub
+    user_info = httpx.get(
+        "https://api.github.com/user",
+        headers={"Authorization": f"token {access_token}"},
+    ).json()
+
+    username = user_info["login"]
+    email = user_info.get("email") or f"{username}@github.com"
+
+    # Check if user exists
+    db_user = db.query(User).filter_by(email=email).first()
+    if not db_user:
+        db_user = User(username=username, email=email)
+        db.add(db_user)
+        db.commit()
+        db.refresh(db_user)
+
+    return {"username": db_user.username, "email": db_user.email}
+
+    # In production, you’d generate a JWT or session cookie after login.
+
+
+@app.post("/token")
+def login_for_access_token(
+    form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)
+):
+    user = db.query(User).filter_by(username=form_data.username).first()
+    if not user:
+        raise HTTPException(status_code=401, detail="Incorrect username or password")
+    if not verify_password(form_data.password, user.password_hash):
+        raise HTTPException(status_code=401, detail="Incorrect username or password")
+
+    access_token = create_access_token(data={"sub": user.username})
+    return {"access_token": access_token, "token_type": "bearer"}
+
+
+@app.post("/notes/protected")
+def create_note_protected(
+    note: NoteCreate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    new_note = Note(content=note.content, media_type="text")
+    new_note.user_id = current_user.id  # link note to user
+    db.add(new_note)
+    db.commit()
+    db.refresh(new_note)
+    return new_note
