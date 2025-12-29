@@ -6,7 +6,10 @@ from sqlalchemy import StaticPool, create_engine, event
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 
-SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./app.db")
+from config import Config
+
+
+SQLALCHEMY_DATABASE_URL = Config.DATABASE_URL
 
 
 if "sqlite" in SQLALCHEMY_DATABASE_URL:
@@ -50,7 +53,7 @@ def init_db():
     Initialize database by creating all tables if they don't exist.
     Safe to call multiple times - won't drop existing data.
     """
-    import models
+    import models  # noqa: F401 # needed for model registration
 
     print("Creating tables if they don't exist...")
     Base.metadata.create_all(bind=engine)
@@ -61,7 +64,7 @@ def reset_db():
     Drop all tables and recreate them.
     ⚠️  WARNING: This deletes ALL data!
     """
-    import models
+    import models  # noqa: F401
 
     print("⚠️  Dropping all tables...")
     Base.metadata.drop_all(bind=engine)

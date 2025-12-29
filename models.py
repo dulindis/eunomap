@@ -1,5 +1,16 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, Table
-from sqlalchemy.orm import relationship
+import re
+
+from sqlalchemy import (
+    Boolean,
+    Column,
+    Integer,
+    String,
+    Text,
+    DateTime,
+    ForeignKey,
+    Table,
+)
+from sqlalchemy.orm import relationship, validates
 from datetime import datetime
 from database import Base
 
@@ -29,6 +40,11 @@ class Note(Base):
         passive_deletes=True,
     )
 
+    owner_id = Column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=True
+    )
+    owner = relationship("User", back_populates="notes")
+
 
 tag_parents = Table(
     "tag_parents",
@@ -55,3 +71,29 @@ class Tag(Base):
         backref="children",
     )
     notes = relationship("Note", secondary=note_tags, back_populates="tags")
+
+
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String, unique=True, index=True, nullable=False)
+    # GitHub username
+    email = Column(String, unique=True, index=True, nullable=True)
+    password_hash = Column(String, nullable=False)
+    is_active = Column(Boolean, default=True)
+
+    notes = relationship("Note", back_populates="owner")
+
+    @validates("email")
+    def validate_email(self, key, value):
+        if value:
+            if not re.match(r"[^@]+@[^@]+\.[^@]+", value):
+                raise ValueError(f"Invalid email address: {value}")
+        return value
+
+    @validates("username")
+    def validate_username(self, key, value):
+        if not value or len(value) < 3:
+            raise ValueError("Username must be at least 3 characters long")
+        return value

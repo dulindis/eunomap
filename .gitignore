@@ -1,0 +1,32 @@
+# Python compiled files
+__pycache__/
+tests/__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+
+# Environment variables
+.env
+
+# Database files
+*.db
+*.db-shm
+*.db-wal
+
+# Media/static/uploads
+media/
+static/
+
+# Pytest cache
+.pytest_cache/
+
+# IDE/project files
+.vscode/
+.idea/
+*.swp

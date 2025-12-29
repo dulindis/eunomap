@@ -4,7 +4,7 @@ from fastapi.testclient import TestClient
 
 from main import app, get_db
 from tests.test_database import create_test_engine, create_session
-from utils import add_tags, load_hierarchy, normalize
+from utils import add_tags, add_user, add_users, load_hierarchy, normalize, SAMPLE_USERS
 
 
 # =============================================================================
@@ -154,6 +154,7 @@ def populated_db(db, test_hierarchy):
     Returns:
         Session: Database session with test tags loaded
     """
+    add_users(SAMPLE_USERS, db)
     add_tags(test_hierarchy, db=db)
     db.commit()
     return db

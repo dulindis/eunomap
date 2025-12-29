@@ -1,5 +1,9 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr, Field
 from typing import List, Optional
+
+from sqlalchemy import Boolean, Column, Integer, String
+
+from database import Base
 
 
 # --- Input Schemas (What you send) ---
@@ -27,6 +31,23 @@ class NoteOut(BaseModel):
     media_type: str
     # tags: List[TagOut]
     tags: List[TagOut] = []
+
+    class Config:
+        orm_mode = True
+
+
+class UserCreate(BaseModel):
+    username: str = Field(..., min_length=3)
+    email: Optional[EmailStr]
+    password_hash: str
+    is_active: bool = True
+
+
+class UserOut(BaseModel):
+    id: int
+    username: str
+    email: Optional[str]
+    is_active: bool
 
     class Config:
         orm_mode = True

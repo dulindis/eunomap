@@ -324,7 +324,7 @@ def test_tag_hierarchy_no_duplicates_multiple_parents(populated_db):
     print(f"✓ No duplicate tags or relationships found")
 
 
-def test_reload_hierarchy_no_duplicates(populated_db,test_hierarchy):
+def test_reload_hierarchy_no_duplicates(populated_db, test_hierarchy):
     """Test that reloading hierarchy doesn't create duplicates."""
 
     # Get initial counts
@@ -385,9 +385,12 @@ def test_tag_can_have_multiple_parents(populated_db):
 
     # Verify it has both parents
     populated_db.expire_all()
+    # now refreshed data should be present
     test_tag = populated_db.query(Tag).filter_by(name="multitag").first()
+    # list comprehension to get parent names
     parent_names = [p.name for p in test_tag.parents]
 
+    # compare strings to strings
     print(f"Multitag parents: {parent_names}")
     assert "fitness" in parent_names
     assert "pet" in parent_names
@@ -441,3 +444,36 @@ def test_debug_tag_creation(populated_db):
         for name in sorted(set(new_tag_names))[:20]:
             count = new_tag_names.count(name)
             print(f"  - '{name}' ({count} copies)")
+
+
+def test_add_user(populated_db):
+    from models import User
+    from utils import add_user
+
+    user = User(
+        username="Ferrarinka",
+        email="test@example.com",
+        password_hash="hashedpassword",
+        is_active=True,
+    )
+    populated_db.add(user)
+    populated_db.commit()
+
+    result = populated_db.query(User).filter_by(email="test@example.com").first()
+
+    assert result is not None, "User should exist in the database"
+    assert result.username == "Ferrarinka"
+    assert result.is_active is True
+    assert hasattr(result, "notes"), "User should have a notes relationship attribute"
+
+    duplicate_user = User(
+        username="Ferrarinka",  # same username
+        email="another@example.com",
+        password_hash="hash2",
+    )
+    populated_db.add(duplicate_user)
+    try:
+        populated_db.commit()
+    except Exception as e:
+        populated_db.rollback()
+        assert "UNIQUE constraint" in str(e), "Duplicate username should raise an error"

@@ -4,11 +4,12 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Optional
 
-from fastapi import Depends, FastAPI, File, Form, HTTPException, UploadFile
+from fastapi import Depends, FastAPI, File, Form, HTTPException, UploadFile, status
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from config import Config
 import database
 import models
 import schemas
@@ -18,6 +19,7 @@ from utils import (
     get_or_create_tag,
     load_hierarchy,
     save_upload,
+    add_user,
 )
 
 UPLOAD_DIR = Path("static/uploads")
@@ -34,7 +36,8 @@ async def lifespan(app: FastAPI):
     print("🚀 Starting application...")
 
     # Check if we should reset the database
-    should_reset = os.getenv("RESET_DB", "false").lower() == "true"
+    # should_reset = os.getenv("RESET_DB", "false").lower() == "true"
+    should_reset = Config.RESET_DB
 
     if should_reset:
         print("⚠️  RESET_DB=true - Resetting database...")
@@ -242,3 +245,31 @@ def generate_wiki_page(topic: str, db: Session = Depends(get_db)):
             )
 
     return result
+
+
+@app.post("/users/", response_model=schemas.UserOut)
+def create_user(user_in: schemas.UserCreate, db: Session = Depends(get_db)):
+    # Check if username/email already exists
+    if db.query(models.User).filter(models.User.username == user_in.username).first():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Username already exists",
+        )
+    if (
+        user_in.email
+        and db.query(models.User).filter(models.User.email == user_in.email).first()
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email already exists",
+        )
+
+    # Create the user
+    user = add_user(
+        db,
+        username=user_in.username,
+        email=user_in.email,
+        password_hash=user_in.password_hash,
+        is_active=user_in.is_active,
+    )
+    return user
