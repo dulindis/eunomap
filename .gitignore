@@ -30,3 +30,5 @@ static/
 .vscode/
 .idea/
 *.swp
+
+.playground.py

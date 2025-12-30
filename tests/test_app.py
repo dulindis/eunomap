@@ -654,11 +654,16 @@ def test_suggest_tags_matches_existing_tags(populated_db):
     assert "travel" in tags
 
 
+# not working now
+@patch("utils.suggest_tags_from_text_semantic")
 @patch("main.model.transcribe")
-@patch("main.suggest_tags_from_text_semantic")
 def test_upload_audio_mock_semantic(
-    mock_suggest, mock_transcribe, client_with_data, in_memory_audio
+    mock_transcribe, mock_suggest, client_with_data, in_memory_audio
 ):
+    """
+    Test /upload_audio/ endpoint with mocked transcription and semantic tag suggestion.
+    """
+
     # Mock transcription
     mock_transcribe.return_value = {
         "text": "This is a note about health and travel",
@@ -690,8 +695,54 @@ def test_upload_audio_mock_semantic(
     assert "travel" in data["suggested_tags"]
     assert "others" in data["suggested_tags"]
 
+    for tag in data["suggested_tags"]:
+        print(f"Suggested tag: {tag}")
+
     # Clean up auth override
     app.dependency_overrides.pop(get_current_user, None)
+
+
+# working ftest
+# @patch("main.model.transcribe")
+# @patch("main.suggest_tags_from_text_semantic")
+# def test_upload_audio_mock_semantic(
+#     mock_suggest, mock_transcribe, client_with_data, in_memory_audio
+# ):
+#     # Mock transcription
+#     mock_transcribe.return_value = {
+#         "text": "This is a note about health and travel",
+#         "segments": [],
+#         "language": "en",
+#     }
+
+#     # Mock semantic suggestion
+#     mock_suggest.return_value = ["health", "travel", "others"]
+
+#     # Bypass authentication
+#     from main import app
+
+#     app.dependency_overrides[get_current_user] = lambda: User(id=1, username="alice123")
+
+#     # Send in-memory audio
+#     response = client_with_data.post(
+#         "/upload_audio/",
+#         files={"file": ("test_note.wav", in_memory_audio, "audio/wav")},
+#         headers={"token": "test"},
+#     )
+
+#     # Test response
+#     assert response.status_code == 200
+#     data = response.json()
+#     assert "transcription" in data
+#     assert "suggested_tags" in data
+#     assert "health" in data["suggested_tags"]
+#     assert "travel" in data["suggested_tags"]
+#     assert "others" in data["suggested_tags"]
+
+#     for tag in data["suggested_tags"]:
+#         print(f"Suggested tag: {tag}")
+#     # Clean up auth override
+#     app.dependency_overrides.pop(get_current_user, None)
 
 
 # def test_upload_audio_endpoint(client, populated_db, sample_audio_path, whisper_model):
@@ -824,3 +875,122 @@ def test_upload_audio_mock_semantic(
 
 #     # Clean up auth override
 #     app.dependency_overrides.pop(get_current_user, None)
+
+
+# def test_suggest_tags_from_text_semantic_realistic(populated_db):
+#     """
+#     Test suggest_tags_from_text_semantic using pre-populated tags.
+#     Covers:
+#       - exact matches
+#       - semantic matches
+#       - fallback to 'others'
+#       - respects selected tags
+#     """
+#     from utils import suggest_tags_from_text_semantic, normalize
+
+#     db_tags = populated_db.query(Tag).all()
+#     print("Tags in DB for testing:")
+#     for t in db_tags:
+#         print(f"- {t.name}")
+#     # -----------------------------
+#     # 1️⃣ Exact match test
+#     # -----------------------------
+#     text = "I need advice on travel insurance and covid-19"
+#     suggested = suggest_tags_from_text_semantic(text, populated_db)
+
+#     # Exact normalized matches should appear
+#     assert any(tag.lower() == "travel_insurance" for tag in suggested)
+#     assert any(tag.lower() == "covid-19" for tag in suggested)
+#     assert len(suggested) <= 4
+#     print("Exact match suggestions:", suggested)
+
+#     # -----------------------------
+#     # 2️⃣ Semantic match test
+#     # -----------------------------
+#     text2 = "Looking for workouts and yoga routines"
+#     suggested2 = suggest_tags_from_text_semantic(text2, populated_db)
+
+#     # Semantic match may pick "workout", "yoga", "fitness" etc.
+#     assert (
+#         any(tag.lower() in ["workout", "yoga"] for tag in suggested2)
+#         or "others" in suggested2
+#     )
+#     assert len(suggested2) <= 4
+#     print("Semantic match suggestions:", suggested2)
+
+#     # -----------------------------
+#     # 3️⃣ No match -> fallback to 'others'
+#     # -----------------------------
+#     text3 = "Quantum physics and black holes"
+#     suggested3 = suggest_tags_from_text_semantic(text3, populated_db)
+#     assert suggested3 == ["others"]
+#     print("No match suggestions (fallback):", suggested3)
+
+#     # -----------------------------
+#     # 4️⃣ Selected tags are excluded
+#     # -----------------------------
+#     selected_tags = ["health", "covid-19"]
+#     text4 = "Covid-19 and doctors advice"
+#     suggested4 = suggest_tags_from_text_semantic(
+#         text4, populated_db, selected_tags=selected_tags
+#     )
+
+#     # Already selected tags should NOT appear
+#     for t in selected_tags:
+#         assert normalize(t) not in [normalize(s) for s in suggested4]
+#     print("Suggestions excluding selected tags:", suggested4)
+
+
+def test_suggest_tags_from_text_semantic_realistic(populated_db):
+    from utils import suggest_tags_from_text_semantic, normalize
+
+    db_tags = populated_db.query(Tag).all()
+    # print("Tags in DB for testing:")
+    # for t in db_tags:
+    #     print(f"- {t.name}")
+
+    # -----------------------------
+    # DEBUG BLOCK — ADD THIS
+    # -----------------------------
+    text = "I need advice on travel insurance and covid-19"
+    text_norm = normalize(text)
+    print(f"\nNormalized text: '{text_norm}'")
+
+    try:
+        covid_tag = next(t for t in db_tags if normalize(t.name) == "covid-19")
+        tag_norm = normalize(covid_tag.name)
+        print(f"Found covid-19 tag: '{covid_tag.name}' → normalized: '{tag_norm}'")
+
+        import re
+
+        # Current buggy pattern
+        pattern_old = rf"\b{re.escape(tag_norm)}\b"
+        print(f"Current regex: {pattern_old}")
+        print(
+            f"   Match with \\b ... \\b ? → {bool(re.search(pattern_old, text_norm))}"
+        )
+
+        # Fixed patterns
+        pattern1 = rf"(?:^|\W){re.escape(tag_norm)}(?:$|\W)"
+        pattern2 = rf"(?:^|\b){re.escape(tag_norm)}(?:\b|$)"
+        print(f"Fixed pattern 1: {pattern1} → {bool(re.search(pattern1, text_norm))}")
+        print(f"Fixed pattern 2: {pattern2} → {bool(re.search(pattern2, text_norm))}")
+
+        # Test if it would match if we added a space
+        print(
+            f"Would match if text had trailing space? → {bool(re.search(pattern_old, text_norm + ' '))}"
+        )
+
+    except StopIteration:
+        print("covid-19 tag NOT found in DB!")
+
+    # -----------------------------
+    # 1. Exact match test
+    # -----------------------------
+    suggested = suggest_tags_from_text_semantic(text, populated_db)
+    print(f"Suggested tags: {suggested}")
+
+    assert any(tag.lower() == "travel_insurance" for tag in suggested)
+    assert any(
+        tag.lower() == "covid-19" for tag in suggested
+    )  # This will fail until fixed

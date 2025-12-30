@@ -4,6 +4,7 @@ import shutil
 import unicodedata
 from pathlib import Path
 from passlib.context import CryptContext
+from typing import List
 
 import inflect
 from fastapi import UploadFile
@@ -38,7 +39,7 @@ DO_NOT_SINGULARIZE = {
     "adhd",
     "hiv",
     "aids",
-    "covid-19",
+    # "covid-19",
     "tips",
     "tricks",
     "others",
@@ -47,11 +48,12 @@ DO_NOT_SINGULARIZE = {
 
 # Explicit aliases for things that should unify
 ALIASES = {
-    "ai/ml": "ai_ml",
-    "c#": "csharp",
-    "node.js": "node_js",
-    "fruit_&_vegetables": "fruit_and_vegetables",
-    "meat_&_seafood": "meat_and_seafood",
+    # "ai/ml": "ai_ml",
+    # "c#": "csharp",
+    # "node.js": "node_js",
+    # "fruit_&_vegetables": "fruit_and_vegetables",
+    # "meat_&_seafood": "meat_and_seafood",
+    # "r&d": "r_and_d",
 }
 
 # Sample users for testing/demo purposes
@@ -60,12 +62,81 @@ SAMPLE_USERS = [
     {"username": "bobby_trax", "email": "bob@example.com", "password_hash": "hash2"},
 ]
 
+# Maximum number of tags to suggest (for semantic search)
+MAX_TAGS = 4
+
 # =============================================================================
 # Tag Normalization
 # =============================================================================
 
 
-def normalize(name: str) -> str:
+# v2
+def normalize(text: str) -> str:
+    """
+    Normalize a tag name while preserving meaningful special characters (#, +, &).
+
+    Process:
+    1. Unicode normalization (NFKC)
+    2. Lowercase
+    3. Apply aliases first
+    4. Remove non-word characters except underscores, hyphens, #, +, &
+    5. Collapse spaces to underscores
+    6. Singularize the last word if applicable
+
+    Examples:
+        >>> normalize("C++ programming")
+        'c++_programming'
+        >>> normalize("Mac&CHEESE")
+        'mac&cheese'
+        >>> normalize("co--op")
+        'co-op'
+        >>> normalize("COVID-19")
+        'covid-19'
+    """
+    if not text:
+        return ""
+
+    # 1️⃣ Unicode normalization and lowercase
+    text = unicodedata.normalize("NFKC", text).strip().lower()
+
+    # 2️⃣ Apply aliases first
+    if text in ALIASES:
+        return ALIASES[text]
+
+    # # 3️⃣ Remove unwanted punctuation but keep #, +, &, hyphen, underscore, and backslash
+    # text = re.sub(r"[^\w\s#\+&\-_\\]", "", text)
+    # 3️⃣ Keep only: letters, digits, spaces, underscores, hyphens, #, +, &, /
+    # Note: Must escape + and & inside character class, or place them carefully
+    # text = re.sub(r"[^a-z0-9\s_\-#+&]", "", text)
+    text = re.sub(r"[^a-z0-9\s_\-#\+&/]", "", text)
+
+    # 4️⃣ Collapse multiple spaces
+    text = re.sub(r"\s+", " ", text)
+
+    # 5️⃣ Convert spaces to underscores (hyphens and special chars preserved)
+    text = text.replace(" ", "_")
+
+    # Remove duplicate underscores
+    text = re.sub(r"_+", "_", text)
+
+    # Remove double hyphens
+    text = re.sub(r"-+", "-", text)
+
+    # 6️⃣ Singularize last word if allowed and purely alphabetic
+    parts = text.split("_")
+    last = parts[-1]
+
+    if last not in DO_NOT_SINGULARIZE and last.isalpha():
+        singular = _inflect.singular_noun(last)
+        if singular:
+            parts[-1] = singular
+
+    text = "_".join(parts)
+
+    return text
+
+    # v1
+    # def normalize(text: str) -> str:
     """
     Normalize a tag name to a consistent format.
 
@@ -79,10 +150,10 @@ def normalize(name: str) -> str:
     7. Singularize the last word (unless in DO_NOT_SINGULARIZE)
 
     Args:
-        name: Raw tag name
+        name: Raw tag text
 
     Returns:
-        Normalized tag name
+        Normalized tag text
 
     Examples:
         >>> normalize("Cats & Dogs")
@@ -92,41 +163,50 @@ def normalize(name: str) -> str:
         >>> normalize("Node.js")
         'node_js'
     """
-    if not name:
+    if not text:
         return ""
 
     # Unicode normalization
-    name = unicodedata.normalize("NFKC", name)
-    name = name.strip().lower()
+    text = unicodedata.normalize("NFKC", text)
+    text = text.strip().lower()
+
+    # Replace special characters
+    text = text.replace("&", " and ")
+    text = text.replace("/", "_")
 
     # Apply aliases
-    if name in ALIASES:
-        return ALIASES[name]
-    # Replace special characters
-    name = name.replace("&", " and ")
-    name = name.replace("/", "_")
+    if text in ALIASES:
+        return ALIASES[text]
 
     # Remove non-word characters (keep underscores and hyphens)
-    name = re.sub(r"[^\w\s-]", "", name)
+    text = re.sub(r"[^\w\s-]", "", text)
 
-    # Convert spaces and hyphens to underscores
-    name = re.sub(r"[\s\-]+", "_", name)
+    # Collapse multiple spaces
+    text = re.sub(r"\s+", " ", text)
+
+    # 6️⃣ Convert spaces to underscores (but preserve hyphens)
+    text = text.replace(" ", "_")
 
     # Remove duplicate underscores
-    name = re.sub(r"_+", "_", name)
+    text = re.sub(r"_+", "_", text)
+
+    # Convert spaces and hyphens to underscores
+    text = re.sub(r"[\s]+", "_", text)
+    # # Convert spaces and hyphens to underscores
+    # text = re.sub(r"[\s\-]+", "_", text)
 
     # Singularize last word if applicable
-    parts = name.split("_")
+    parts = text.split("_")
     last = parts[-1]
 
-    if last not in DO_NOT_SINGULARIZE:
+    if last not in DO_NOT_SINGULARIZE and last.isalpha():  # only alphabetic words
         singular = _inflect.singular_noun(last)
         if singular:
             parts[-1] = singular
 
-    name = "_".join(parts)
+    text = "_".join(parts)
 
-    return name
+    return text
 
 
 # =============================================================================
@@ -427,66 +507,142 @@ def suggest_tags_from_text(
 # Load a small embedding model once
 embed_model = SentenceTransformer("all-MiniLM-L6-v2")  # fast, small
 
+# v1
+# def suggest_tags_from_text_semantic(
+#     text: str,
+#     db: Session,
+#     selected_tags: list[str] | None = None,
+#     threshold: float = 0.6,  # similarity threshold
+# ) -> list[str]:
+#     if not text:
+#         return ["others"]
 
+#     selected = {normalize(t) for t in (selected_tags or [])}
+#     text_norm = normalize(text)
+
+#     tags = db.query(Tag).all()
+#     suggestions = []
+
+#     # Exact match first
+#     for tag in tags:
+#         tag_norm = normalize(tag.name)
+#         if tag_norm in selected:
+#             continue
+#         if re.search(rf"\b{re.escape(tag_norm)}\b", text_norm):
+#             suggestions.append(tag.name)
+
+#     # 3️⃣ Semantic similarity (optional, requires embed_model)
+#     if not suggestions and embed_model:
+#         tag_texts = [tag.name for tag in tags if normalize(tag.name) not in selected]
+#         if tag_texts:
+#             text_emb = embed_model.encode(text_norm, convert_to_tensor=True)
+#             tag_embs = embed_model.encode(tag_texts, convert_to_tensor=True)
+#             from sentence_transformers import util
+
+#             sims = util.cos_sim(text_emb, tag_embs)[0]
+
+#             for i, sim_score in enumerate(sims):
+#                 if sim_score >= threshold:
+#                     suggestions.append(tag_texts[i])
+
+#     if not suggestions:
+#         suggestions.append("others")
+
+#     # Sort by frequency in text for exact matches first
+#     suggestions_sorted = sorted(
+#         suggestions, key=lambda t: text_norm.count(normalize(t)), reverse=True
+#     )
+
+#     return suggestions_sorted
+
+
+# v2
 def suggest_tags_from_text_semantic(
     text: str,
     db: Session,
-    selected_tags: list[str] | None = None,
-    threshold: float = 0.6,  # similarity threshold
-) -> list[str]:
+    selected_tags: List[str] | None = None,
+    threshold: float = 0.6,
+) -> List[str]:
+    """
+    Suggests tags for a given text using exact match and semantic similarity.
+
+    Args:
+        text: Input text to extract tags from.
+        db: SQLAlchemy database session.
+        selected_tags: Already selected tags to exclude from suggestions.
+        threshold: Minimum similarity score for semantic suggestions.
+
+    Returns:
+        List of suggested tag names (max MAX_TAGS). If none found, returns ["others"].
+    """
     if not text:
         return ["others"]
 
-    selected = {normalize(t) for t in (selected_tags or [])}
+    selected_norm = {normalize(t) for t in (selected_tags or [])}
     text_norm = normalize(text)
 
+    # Fetch all tags
     tags = db.query(Tag).all()
     suggestions = []
 
-    # Exact match first
+    # 1️⃣ Exact matches
+    # remaining_tags = []
+    exact_matches = []
+    remaining_tags_list = []
+
     for tag in tags:
         tag_norm = normalize(tag.name)
-        if tag_norm in selected:
+        if tag_norm in selected_norm:
             continue
-        if re.search(rf"\b{re.escape(tag_norm)}\b", text_norm):
-            suggestions.append(tag.name)
 
-    # 3️⃣ Semantic similarity (optional, requires embed_model)
-    if not suggestions and embed_model:
-        tag_texts = [tag.name for tag in tags if normalize(tag.name) not in selected]
-        if tag_texts:
-            text_emb = embed_model.encode(text_norm, convert_to_tensor=True)
-            tag_embs = embed_model.encode(tag_texts, convert_to_tensor=True)
-            from sentence_transformers import util
+        pattern = rf"(?:^|_){re.escape(tag_norm)}(?:_|$)"
+        if re.search(pattern, text_norm):
+            exact_matches.append(tag.name)
+        else:
+            remaining_tags_list.append(tag)
 
-            sims = util.cos_sim(text_emb, tag_embs)[0]
+    suggestions.extend(exact_matches[:MAX_TAGS])
 
-            for i, sim_score in enumerate(sims):
-                if sim_score >= threshold:
-                    suggestions.append(tag_texts[i])
-    # Semantic matching if no exact matches
-    # if not suggestions:
-    #     tag_texts = [tag.name for tag in tags if normalize(tag.name) not in selected]
-    #     if tag_texts:
-    #         text_emb = embed_model.encode(text_norm, convert_to_tensor=True)
-    #         tag_embs = embed_model.encode(tag_texts, convert_to_tensor=True)
-    #         sims = util.cos_sim(text_emb, tag_embs)[0]
+    # # Stop if we already reached max tags
+    if len(suggestions) >= MAX_TAGS:
+        return suggestions[:MAX_TAGS]
 
-    #         for i, sim_score in enumerate(sims):
-    #             if sim_score >= threshold:
-    #                 suggestions.append(tag_texts[i])
+    # 2️⃣ Semantic similarity for remaining tags
+    if remaining_tags_list and embed_model:
+        tag_texts = [tag.name for tag in remaining_tags_list]
+        tag_norms = [normalize(tag.name) for tag in remaining_tags_list]
 
-    # if "others" not in [t.lower() for t in suggestions]:
-    #     suggestions.append("others")
+        # Compute embeddings
+        text_emb = embed_model.encode(text_norm, convert_to_tensor=True)
+        tag_embs = embed_model.encode(tag_texts, convert_to_tensor=True)
+        sims = util.cos_sim(text_emb, tag_embs)[0]
+
+        # Collect tags above threshold
+        sem_suggestions = [
+            tag_texts[i]
+            for i, sim_score in enumerate(sims)
+            if sim_score >= threshold and tag_norms[i] not in selected_norm
+        ]
+
+        # Sort by similarity
+        sem_suggestions_sorted = [
+            tag
+            for _, tag in sorted(
+                zip(sims.tolist(), sem_suggestions), key=lambda x: x[0], reverse=True
+            )
+        ]
+
+        # Add remaining tags up to MAX_TAGS
+        for tag in sem_suggestions_sorted:
+            if len(suggestions) >= MAX_TAGS:
+                break
+            suggestions.append(tag)
+
+    # 3️⃣ Fallback to "others"
     if not suggestions:
         suggestions.append("others")
 
-    # Sort by frequency in text for exact matches first
-    suggestions_sorted = sorted(
-        suggestions, key=lambda t: text_norm.count(normalize(t)), reverse=True
-    )
-
-    return suggestions_sorted
+    return suggestions
 
 
 # =============================================================================

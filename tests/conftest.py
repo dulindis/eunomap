@@ -86,7 +86,7 @@ def client_with_data(populated_db, whisper_model=None):
     if whisper_model is not None:
         global main_model
         main_model = whisper_model
-        
+
     yield TestClient(app)
     app.dependency_overrides.clear()
 
