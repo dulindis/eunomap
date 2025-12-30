@@ -2,12 +2,14 @@ import os
 
 from unittest.mock import patch
 from sqlalchemy import select, func
+from dependencies import get_current_user
 from utils import (
     load_hierarchy,
     normalize,
     add_tags,
     get_or_create_tag,
     suggest_tags_from_text,
+    suggest_tags_from_text_semantic,
 )
 from models import Tag, Note, note_tags, tag_parents, User
 
@@ -650,6 +652,46 @@ def test_suggest_tags_matches_existing_tags(populated_db):
 
     assert "health" in tags
     assert "travel" in tags
+
+
+@patch("main.model.transcribe")
+@patch("main.suggest_tags_from_text_semantic")
+def test_upload_audio_mock_semantic(
+    mock_suggest, mock_transcribe, client_with_data, in_memory_audio
+):
+    # Mock transcription
+    mock_transcribe.return_value = {
+        "text": "This is a note about health and travel",
+        "segments": [],
+        "language": "en",
+    }
+
+    # Mock semantic suggestion
+    mock_suggest.return_value = ["health", "travel", "others"]
+
+    # Bypass authentication
+    from main import app
+
+    app.dependency_overrides[get_current_user] = lambda: User(id=1, username="alice123")
+
+    # Send in-memory audio
+    response = client_with_data.post(
+        "/upload_audio/",
+        files={"file": ("test_note.wav", in_memory_audio, "audio/wav")},
+        headers={"token": "test"},
+    )
+
+    # Test response
+    assert response.status_code == 200
+    data = response.json()
+    assert "transcription" in data
+    assert "suggested_tags" in data
+    assert "health" in data["suggested_tags"]
+    assert "travel" in data["suggested_tags"]
+    assert "others" in data["suggested_tags"]
+
+    # Clean up auth override
+    app.dependency_overrides.pop(get_current_user, None)
 
 
 # def test_upload_audio_endpoint(client, populated_db, sample_audio_path, whisper_model):

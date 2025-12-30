@@ -77,10 +77,16 @@ def client(db, whisper_model=None):
 
 @pytest.fixture()
 def client_with_data(populated_db, whisper_model=None):
+    """
+    FastAPI TestClient with database dependency override.
+    Optionally override the Whisper model for testing.
+    """
     app.dependency_overrides[get_db] = lambda: populated_db
+
     if whisper_model is not None:
         global main_model
         main_model = whisper_model
+        
     yield TestClient(app)
     app.dependency_overrides.clear()
 

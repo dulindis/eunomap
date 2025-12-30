@@ -8,6 +8,8 @@ from passlib.context import CryptContext
 import inflect
 from fastapi import UploadFile
 from sqlalchemy.orm import Session
+from sentence_transformers import SentenceTransformer, util
+
 
 import models
 from models import Tag
@@ -419,6 +421,71 @@ def suggest_tags_from_text(
     suggestions_sorted = sorted(
         suggestions, key=lambda t: text_norm.count(normalize(t)), reverse=True
     )
+    return suggestions_sorted
+
+
+# Load a small embedding model once
+embed_model = SentenceTransformer("all-MiniLM-L6-v2")  # fast, small
+
+
+def suggest_tags_from_text_semantic(
+    text: str,
+    db: Session,
+    selected_tags: list[str] | None = None,
+    threshold: float = 0.6,  # similarity threshold
+) -> list[str]:
+    if not text:
+        return ["others"]
+
+    selected = {normalize(t) for t in (selected_tags or [])}
+    text_norm = normalize(text)
+
+    tags = db.query(Tag).all()
+    suggestions = []
+
+    # Exact match first
+    for tag in tags:
+        tag_norm = normalize(tag.name)
+        if tag_norm in selected:
+            continue
+        if re.search(rf"\b{re.escape(tag_norm)}\b", text_norm):
+            suggestions.append(tag.name)
+
+    # 3️⃣ Semantic similarity (optional, requires embed_model)
+    if not suggestions and embed_model:
+        tag_texts = [tag.name for tag in tags if normalize(tag.name) not in selected]
+        if tag_texts:
+            text_emb = embed_model.encode(text_norm, convert_to_tensor=True)
+            tag_embs = embed_model.encode(tag_texts, convert_to_tensor=True)
+            from sentence_transformers import util
+
+            sims = util.cos_sim(text_emb, tag_embs)[0]
+
+            for i, sim_score in enumerate(sims):
+                if sim_score >= threshold:
+                    suggestions.append(tag_texts[i])
+    # Semantic matching if no exact matches
+    # if not suggestions:
+    #     tag_texts = [tag.name for tag in tags if normalize(tag.name) not in selected]
+    #     if tag_texts:
+    #         text_emb = embed_model.encode(text_norm, convert_to_tensor=True)
+    #         tag_embs = embed_model.encode(tag_texts, convert_to_tensor=True)
+    #         sims = util.cos_sim(text_emb, tag_embs)[0]
+
+    #         for i, sim_score in enumerate(sims):
+    #             if sim_score >= threshold:
+    #                 suggestions.append(tag_texts[i])
+
+    # if "others" not in [t.lower() for t in suggestions]:
+    #     suggestions.append("others")
+    if not suggestions:
+        suggestions.append("others")
+
+    # Sort by frequency in text for exact matches first
+    suggestions_sorted = sorted(
+        suggestions, key=lambda t: text_norm.count(normalize(t)), reverse=True
+    )
+
     return suggestions_sorted
 
 

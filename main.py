@@ -28,6 +28,7 @@ from utils import (
     save_upload,
     add_user,
     suggest_tags_from_text,
+    suggest_tags_from_text_semantic,
     verify_password,
 )
 
@@ -435,7 +436,8 @@ async def upload_audio(
     finally:
         os.remove(audio_path)
 
-    suggested_tags = suggest_tags_from_text(text, db)
+    # suggested_tags = suggest_tags_from_text(text, db)
+    suggested_tags = suggest_tags_from_text_semantic(text, db)
 
     return {
         "transcription": text,
