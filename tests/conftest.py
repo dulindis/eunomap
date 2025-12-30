@@ -49,6 +49,24 @@ def db():
             os.remove(db_path)
 
 
+@pytest.fixture
+def populated_db(db, test_hierarchy):
+    """
+    Database pre-populated with test hierarchy tags.
+
+    Args:
+        db: Clean database session
+        test_hierarchy: Test hierarchy data
+
+    Returns:
+        Session: Database session with test tags loaded
+    """
+    add_users(SAMPLE_USERS, db)
+    add_tags(test_hierarchy, db=db)
+    db.commit()
+    return db
+
+
 # =============================================================================
 # API Client Fixtures
 # =============================================================================
@@ -170,24 +188,6 @@ def expected_tag_names():
 
     # Apply normalize() to all tags
     return {normalize(name) for name in raw_tags}
-
-
-@pytest.fixture
-def populated_db(db, test_hierarchy):
-    """
-    Database pre-populated with test hierarchy tags.
-
-    Args:
-        db: Clean database session
-        test_hierarchy: Test hierarchy data
-
-    Returns:
-        Session: Database session with test tags loaded
-    """
-    add_users(SAMPLE_USERS, db)
-    add_tags(test_hierarchy, db=db)
-    db.commit()
-    return db
 
 
 @pytest.fixture

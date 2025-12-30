@@ -22,6 +22,9 @@ from models import Tag
 # Inflect engine for pluralization/singularization
 _inflect = inflect.engine()
 
+# Load a small embedding model once
+embed_model = SentenceTransformer("all-MiniLM-L6-v2")  # fast, small
+
 DO_NOT_SINGULARIZE = {
     "news",
     "series",
@@ -479,170 +482,205 @@ def suggest_tags_from_text(
     if not text:
         return ["others"]
     # Normalize selected tags
-    selected = {normalize(t) for t in (selected_tags or [])}
+    selected_norm = {normalize(t) for t in (selected_tags or [])}
+
     text_norm = normalize(text)
     tags = db.query(Tag).all()
     # for t in db.query(Tag).all():
     #     print("TAGI TESTOWE:", t.name)
-    suggestions = []
 
-    for tag in tags:
-        tag_norm = normalize(tag.name)
-
-        if tag_norm in selected:
-            continue
-
-        if tag_norm in text_norm:
-            suggestions.append(tag.name)
-
-    if not suggestions:
-        suggestions.append("others")
-
-    suggestions_sorted = sorted(
-        suggestions, key=lambda t: text_norm.count(normalize(t)), reverse=True
+    matches = find_exact_tag_matches(
+        text_norm=text_norm,
+        tags=tags,
+        selected_norm=selected_norm,
     )
-    return suggestions_sorted
+
+    if not matches:
+        return ["others"]
+
+    return sorted(
+        matches,
+        key=lambda t: text_norm.count(normalize(t)),
+        reverse=True,
+    )
 
 
-# Load a small embedding model once
-embed_model = SentenceTransformer("all-MiniLM-L6-v2")  # fast, small
-
-# v1
+# working
 # def suggest_tags_from_text_semantic(
 #     text: str,
 #     db: Session,
-#     selected_tags: list[str] | None = None,
-#     threshold: float = 0.6,  # similarity threshold
-# ) -> list[str]:
+#     selected_tags: List[str] | None = None,
+#     threshold: float = 0.6,
+# ) -> List[str]:
+#     """
+#     Suggests tags for a given text using exact match and semantic similarity.
+
+#     Args:
+#         text: Input text to extract tags from.
+#         db: SQLAlchemy database session.
+#         selected_tags: Already selected tags to exclude from suggestions.
+#         threshold: Minimum similarity score for semantic suggestions.
+
+#     Returns:
+#         List of suggested tag names (max MAX_TAGS). If none found, returns ["others"].
+#     """
 #     if not text:
 #         return ["others"]
 
-#     selected = {normalize(t) for t in (selected_tags or [])}
+#     selected_norm = {normalize(t) for t in (selected_tags or [])}
 #     text_norm = normalize(text)
 
+#     # Fetch all tags
 #     tags = db.query(Tag).all()
 #     suggestions = []
 
-#     # Exact match first
+#     # Exact matches
+#     exact_matches = []
+#     remaining_tags_list = []
+
 #     for tag in tags:
 #         tag_norm = normalize(tag.name)
-#         if tag_norm in selected:
+#         if tag_norm in selected_norm:
 #             continue
-#         if re.search(rf"\b{re.escape(tag_norm)}\b", text_norm):
-#             suggestions.append(tag.name)
 
-#     # 3️⃣ Semantic similarity (optional, requires embed_model)
-#     if not suggestions and embed_model:
-#         tag_texts = [tag.name for tag in tags if normalize(tag.name) not in selected]
-#         if tag_texts:
-#             text_emb = embed_model.encode(text_norm, convert_to_tensor=True)
-#             tag_embs = embed_model.encode(tag_texts, convert_to_tensor=True)
-#             from sentence_transformers import util
+#         pattern = rf"(?:^|_){re.escape(tag_norm)}(?:_|$)"
+#         if re.search(pattern, text_norm):
+#             exact_matches.append(tag.name)
+#         else:
+#             remaining_tags_list.append(tag)
 
-#             sims = util.cos_sim(text_emb, tag_embs)[0]
+#     suggestions.extend(exact_matches[:MAX_TAGS])
 
-#             for i, sim_score in enumerate(sims):
-#                 if sim_score >= threshold:
-#                     suggestions.append(tag_texts[i])
+#     # # Stop if we already reached max tags
+#     if len(suggestions) >= MAX_TAGS:
+#         return suggestions[:MAX_TAGS]
 
+#     # Semantic similarity for remaining tags
+#     if remaining_tags_list and embed_model:
+#         tag_texts = [tag.name for tag in remaining_tags_list]
+#         tag_norms = [normalize(tag.name) for tag in remaining_tags_list]
+
+#         # Compute embeddings
+#         text_emb = embed_model.encode(text_norm, convert_to_tensor=True)
+#         tag_embs = embed_model.encode(tag_texts, convert_to_tensor=True)
+#         sims = util.cos_sim(text_emb, tag_embs)[0]
+
+#         # Collect tags above threshold
+#         sem_suggestions = [
+#             tag_texts[i]
+#             for i, sim_score in enumerate(sims)
+#             if sim_score >= threshold and tag_norms[i] not in selected_norm
+#         ]
+
+#         # Sort by similarity
+#         sem_suggestions_sorted = [
+#             tag
+#             for _, tag in sorted(
+#                 zip(sims.tolist(), sem_suggestions), key=lambda x: x[0], reverse=True
+#             )
+#         ]
+
+#         # Add remaining tags up to MAX_TAGS
+#         for tag in sem_suggestions_sorted:
+#             if len(suggestions) >= MAX_TAGS:
+#                 break
+#             suggestions.append(tag)
+
+#     # Fallback to "others"
 #     if not suggestions:
 #         suggestions.append("others")
 
-#     # Sort by frequency in text for exact matches first
-#     suggestions_sorted = sorted(
-#         suggestions, key=lambda t: text_norm.count(normalize(t)), reverse=True
-#     )
-
-#     return suggestions_sorted
+#     return suggestions
 
 
-# v2
-def suggest_tags_from_text_semantic(
-    text: str,
-    db: Session,
-    selected_tags: List[str] | None = None,
-    threshold: float = 0.6,
-) -> List[str]:
+def find_exact_tag_matches(
+    text_norm: str,
+    tags: list[Tag],
+    selected_norm: set[str],
+) -> tuple[list[str], list[Tag]]:
     """
-    Suggests tags for a given text using exact match and semantic similarity.
-
-    Args:
-        text: Input text to extract tags from.
-        db: SQLAlchemy database session.
-        selected_tags: Already selected tags to exclude from suggestions.
-        threshold: Minimum similarity score for semantic suggestions.
+    Finds exact tag matches in text.
 
     Returns:
-        List of suggested tag names (max MAX_TAGS). If none found, returns ["others"].
+        - list of matched tag names
+        - list of remaining Tag objects (not matched)
     """
-    if not text:
-        return ["others"]
-
-    selected_norm = {normalize(t) for t in (selected_tags or [])}
-    text_norm = normalize(text)
-
-    # Fetch all tags
-    tags = db.query(Tag).all()
-    suggestions = []
-
-    # 1️⃣ Exact matches
-    # remaining_tags = []
-    exact_matches = []
-    remaining_tags_list = []
+    matches: list[str] = []
 
     for tag in tags:
         tag_norm = normalize(tag.name)
+
         if tag_norm in selected_norm:
             continue
 
-        pattern = rf"(?:^|_){re.escape(tag_norm)}(?:_|$)"
-        if re.search(pattern, text_norm):
-            exact_matches.append(tag.name)
-        else:
-            remaining_tags_list.append(tag)
+        if tag_norm in text_norm:
+            matches.append(tag.name)
 
-    suggestions.extend(exact_matches[:MAX_TAGS])
+    return matches
 
-    # # Stop if we already reached max tags
+
+def suggest_tags_from_text_semantic(
+    text: str,
+    db: Session,
+    selected_tags: list[str] | None = None,
+    threshold: float = 0.6,
+) -> list[str]:
+    if not text:
+        return ["others"]
+
+    text_norm = normalize(text)
+    selected_norm = {normalize(t) for t in (selected_tags or [])}
+
+    tags = db.query(Tag).all()
+    suggestions: list[str] = []
+
+    # 1️⃣ Exact matches
+    exact_matches = find_exact_tag_matches(
+        text_norm=text_norm,
+        tags=tags,
+        selected_norm=selected_norm,
+    )
+    exact_matches_sorted = sorted(
+        exact_matches,
+        key=lambda t: text_norm.count(normalize(t)),
+        reverse=True,
+    )
+    suggestions.extend(exact_matches_sorted[:MAX_TAGS])
+
     if len(suggestions) >= MAX_TAGS:
         return suggestions[:MAX_TAGS]
 
-    # 2️⃣ Semantic similarity for remaining tags
-    if remaining_tags_list and embed_model:
-        tag_texts = [tag.name for tag in remaining_tags_list]
-        tag_norms = [normalize(tag.name) for tag in remaining_tags_list]
+    matched_norms = {normalize(t) for t in exact_matches}
+    remaining_tags = [
+        tag
+        for tag in tags
+        if normalize(tag.name) not in matched_norms
+        and normalize(tag.name) not in selected_norm
+    ]
 
-        # Compute embeddings
+    # 2️⃣ Semantic matches
+    if remaining_tags and embed_model:
+        tag_texts = [tag.name for tag in remaining_tags]
+        tag_norms = [normalize(tag.name) for tag in remaining_tags]
+
         text_emb = embed_model.encode(text_norm, convert_to_tensor=True)
         tag_embs = embed_model.encode(tag_texts, convert_to_tensor=True)
         sims = util.cos_sim(text_emb, tag_embs)[0]
 
-        # Collect tags above threshold
-        sem_suggestions = [
-            tag_texts[i]
-            for i, sim_score in enumerate(sims)
-            if sim_score >= threshold and tag_norms[i] not in selected_norm
+        sem_candidates = [
+            (sims[i].item(), tag_texts[i])
+            for i in range(len(tag_texts))
+            if sims[i] >= threshold and tag_norms[i] not in selected_norm
         ]
 
-        # Sort by similarity
-        sem_suggestions_sorted = [
-            tag
-            for _, tag in sorted(
-                zip(sims.tolist(), sem_suggestions), key=lambda x: x[0], reverse=True
-            )
-        ]
+        sem_candidates.sort(key=lambda x: x[0], reverse=True)
 
-        # Add remaining tags up to MAX_TAGS
-        for tag in sem_suggestions_sorted:
+        for _, tag in sem_candidates:
             if len(suggestions) >= MAX_TAGS:
                 break
             suggestions.append(tag)
 
-    # 3️⃣ Fallback to "others"
-    if not suggestions:
-        suggestions.append("others")
-
-    return suggestions
+    return suggestions or ["others"]
 
 
 # =============================================================================

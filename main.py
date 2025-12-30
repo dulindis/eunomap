@@ -22,12 +22,10 @@ from dependencies import get_current_user
 from utils import (
     flatten_hierarchy,
     get_or_create_tag,
-    get_suggestions,
     hash_password,
     load_hierarchy,
     save_upload,
     add_user,
-    suggest_tags_from_text,
     suggest_tags_from_text_semantic,
     verify_password,
 )
