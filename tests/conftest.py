@@ -1,11 +1,17 @@
 import os
 import pytest
+import io
+import wave
+import struct
+
 from fastapi.testclient import TestClient
 
-from main import app 
+from main import app
 from database import get_db
 from tests.test_database import create_test_engine, create_session
 from utils import add_tags, add_user, add_users, load_hierarchy, normalize, SAMPLE_USERS
+import pytest
+import whisper
 
 
 # =============================================================================
@@ -47,17 +53,34 @@ def db():
 # API Client Fixtures
 # =============================================================================
 @pytest.fixture()
-def client(db):
+def client(db, whisper_model=None):
     """
     FastAPI TestClient with database dependency override.
+    Optionally override the Whisper model for faster tests or mocking.
 
     Args:
         db: Database session fixture
+        whisper_model: Optional Whisper model to override main.model
 
     Yields:
         TestClient: Configured test client for API requests
     """
     app.dependency_overrides[get_db] = lambda: db
+
+    if whisper_model is not None:
+        global main_model
+        main_model = whisper_model
+
+    yield TestClient(app)
+    app.dependency_overrides.clear()
+
+
+@pytest.fixture()
+def client_with_data(populated_db, whisper_model=None):
+    app.dependency_overrides[get_db] = lambda: populated_db
+    if whisper_model is not None:
+        global main_model
+        main_model = whisper_model
     yield TestClient(app)
     app.dependency_overrides.clear()
 
@@ -159,3 +182,43 @@ def populated_db(db, test_hierarchy):
     add_tags(test_hierarchy, db=db)
     db.commit()
     return db
+
+
+@pytest.fixture
+def sample_audio_path():
+    path = "tests/test_note.wav"
+    # Create a short silent WAV file if it doesn't exist
+    if not os.path.exists(path):
+        import wave
+        import struct
+
+        with wave.open(path, "w") as f:
+            f.setnchannels(1)
+            f.setsampwidth(2)
+            f.setframerate(16000)
+            frames = [struct.pack("h", 0) for _ in range(16000)]
+            f.writeframes(b"".join(frames))
+    return path
+
+
+@pytest.fixture(scope="session")
+def whisper_model():
+    model = whisper.load_model("small")  # load once
+    return model
+
+
+@pytest.fixture
+def in_memory_audio():
+    """
+    Generates a 1-second silent WAV file in memory.
+    Returns a BytesIO object ready for upload.
+    """
+    buffer = io.BytesIO()
+    with wave.open(buffer, "wb") as f:
+        f.setnchannels(1)  # mono
+        f.setsampwidth(2)  # 2 bytes per sample
+        f.setframerate(16000)  # 16kHz
+        frames = [struct.pack("h", 0) for _ in range(16000)]
+        f.writeframes(b"".join(frames))
+    buffer.seek(0)  # reset cursor
+    return buffer

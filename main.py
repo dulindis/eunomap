@@ -5,12 +5,12 @@ from pathlib import Path
 from typing import Optional
 import httpx
 
-
 from fastapi import Depends, FastAPI, File, Form, HTTPException, UploadFile, status
 from fastapi.staticfiles import StaticFiles
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy import text
 from sqlalchemy.orm import Session
+import whisper
 
 from auth import create_access_token, verify_access_token
 from config import Config
@@ -22,15 +22,24 @@ from dependencies import get_current_user
 from utils import (
     flatten_hierarchy,
     get_or_create_tag,
+    get_suggestions,
     hash_password,
     load_hierarchy,
     save_upload,
     add_user,
+    suggest_tags_from_text,
     verify_password,
 )
 
 UPLOAD_DIR = Path("static/uploads")
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+
+# Load Whisper model once (small for CPU testing)
+model = whisper.load_model("small")
+
+# Temporary folder for audio files
+TEMP_DIR = "./temp"
+os.makedirs(TEMP_DIR, exist_ok=True)
 
 
 @asynccontextmanager
@@ -367,3 +376,68 @@ def create_note_protected(
     db.commit()
     db.refresh(new_note)
     return new_note
+
+
+# @app.post("/upload_audio/")
+# async def upload_audio(
+#     file: UploadFile = File(...),
+#     db: Session = Depends(get_db),
+#     user=Depends(get_current_user),
+# ):
+#     print("➡️ ENTERED upload_audio")
+#     print("Current user:", user)
+#     print("Filename:", file.filename)
+#     # Save temporary file
+#     audio_path = os.path.join(TEMP_DIR, file.filename)
+#     with open(audio_path, "wb") as f:
+#         f.write(await file.read())
+
+#     # Transcribe audio
+#     try:
+#         result = model.transcribe(audio_path)
+#         transcription = result["text"]
+#         print("Transcription:", result)
+
+#     except Exception as e:
+#         os.remove(audio_path)
+#         raise HTTPException(status_code=500, detail=f"Transcription error: {str(e)}")
+
+#     os.remove(audio_path)  # delete temp file after processing
+
+#     # Build flat_mapping from Tag table
+#     tags_in_db = db.query(Tag).all()
+#     flat_mapping = {tag.name: [] for tag in tags_in_db}
+
+#     # Use your existing get_suggestions function
+#     suggested_tags = get_suggestions(
+#         selected_tags=[], current_input=transcription, flat_mapping=flat_mapping
+#     )
+#     print("Tags found:", suggested_tags)
+
+#     return {"transcription": transcription, "tags": suggested_tags}
+
+
+@app.post("/upload_audio/")
+async def upload_audio(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    # user=Depends(get_current_user),
+):
+    # audio_path = save_temp(file)
+    audio_path = os.path.join(TEMP_DIR, file.filename)
+
+    with open(audio_path, "wb") as f:
+        f.write(await file.read())
+
+    try:
+        result = model.transcribe(audio_path)
+        text = result["text"]
+    finally:
+        os.remove(audio_path)
+
+    suggested_tags = suggest_tags_from_text(text, db)
+
+    return {
+        "transcription": text,
+        "suggested_tags": suggested_tags,
+    }

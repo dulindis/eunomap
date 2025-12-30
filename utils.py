@@ -97,6 +97,9 @@ def normalize(name: str) -> str:
     name = unicodedata.normalize("NFKC", name)
     name = name.strip().lower()
 
+    # Apply aliases
+    if name in ALIASES:
+        return ALIASES[name]
     # Replace special characters
     name = name.replace("&", " and ")
     name = name.replace("/", "_")
@@ -109,10 +112,6 @@ def normalize(name: str) -> str:
 
     # Remove duplicate underscores
     name = re.sub(r"_+", "_", name)
-
-    # Apply aliases
-    if name in ALIASES:
-        return ALIASES[name]
 
     # Singularize last word if applicable
     parts = name.split("_")
@@ -382,9 +381,45 @@ def get_suggestions(selected_tags, current_input, flat_mapping) -> list[str]:
     return [
         s
         for s in suggestions
-        if s.lower().startswith(current_input.lower())
+        if s.lower().startswith(
+            current_input.lower()
+        )  # This will never work for transcriptions.
         and s.lower() not in [t.lower() for t in selected_tags]
     ]
+
+
+def suggest_tags_from_text(
+    text: str,
+    db: Session,
+    selected_tags: list[str] | None = None,
+) -> list[str]:
+
+    if not text:
+        return ["others"]
+    # Normalize selected tags
+    selected = {normalize(t) for t in (selected_tags or [])}
+    text_norm = normalize(text)
+    tags = db.query(Tag).all()
+    # for t in db.query(Tag).all():
+    #     print("TAGI TESTOWE:", t.name)
+    suggestions = []
+
+    for tag in tags:
+        tag_norm = normalize(tag.name)
+
+        if tag_norm in selected:
+            continue
+
+        if tag_norm in text_norm:
+            suggestions.append(tag.name)
+
+    if not suggestions:
+        suggestions.append("others")
+
+    suggestions_sorted = sorted(
+        suggestions, key=lambda t: text_norm.count(normalize(t)), reverse=True
+    )
+    return suggestions_sorted
 
 
 # =============================================================================

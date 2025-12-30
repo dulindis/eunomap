@@ -1,7 +1,15 @@
+import os
+
 from unittest.mock import patch
 from sqlalchemy import select, func
-from utils import load_hierarchy, normalize, add_tags, get_or_create_tag
-from models import Tag, Note, note_tags, tag_parents
+from utils import (
+    load_hierarchy,
+    normalize,
+    add_tags,
+    get_or_create_tag,
+    suggest_tags_from_text,
+)
+from models import Tag, Note, note_tags, tag_parents, User
 
 
 def test_print_tags(populated_db):
@@ -454,7 +462,7 @@ Good for unit-testing ORM behavior, constraints, and relationships."""
 
 
 def test_add_user_to_db(populated_db):
-    from models import User
+    # from models import User
 
     user = User(
         username="Ferrarinka",
@@ -494,7 +502,7 @@ This is what you want for testing signup behavior.
 
 
 def test_create_user_endpoint(client, populated_db):
-    from models import User
+    # from models import User
 
     # Step 1: Send a POST request to your "create user" endpoint
     response = client.post(
@@ -519,7 +527,7 @@ def test_create_user_endpoint(client, populated_db):
 
 
 def test_create_user_duplicate(client):
-    from models import User
+    # from models import User
 
     client.post(
         "/users/",
@@ -572,39 +580,6 @@ def test_github_oauth(client, populated_db):
         assert user_in_db is not None
         assert user_in_db.username == "ghuser"
 
-    # from models import User
-
-    # with patch("httpx.post") as mock_post, patch("httpx.get") as mock_get, patch(
-    #     "main.Config.GITHUB_CLIENT_SECRET", "fake_secret"
-    # ):
-    #     # Mock GitHub API responses
-    #     mock_post.return_value.json.return_value = {"access_token": "token123"}
-    #     mock_get.return_value.json.return_value = {
-    #         "login": "ghuser",
-    #         "email": "gh@example.com",
-    #     }
-
-    #     # Call the OAuth callback
-    #     response = client.get("/auth/github/callback?code=fakecode")
-
-    #     assert response.status_code == 200
-    #     data = response.json()
-    #     assert data["username"] == "ghuser"
-    #     assert data["email"] == "gh@example.com"
-    # with patch("httpx.post") as mock_post, patch("httpx.get") as mock_get:
-    #     mock_post.return_value.json.return_value = {"access_token": "token123"}
-    #     mock_get.return_value.json.return_value = {
-    #         "login": "ghuser",
-    #         "email": "gh@example.com",
-    #     }
-
-    #     response = client.get("/auth/github/callback?code=fakecode")
-    #     assert response.status_code == 200
-    #     assert response.json()["username"] == "ghuser"
-
-    #     user_in_db = populated_db.query(User).filter_by(email="gh@example.com").first()
-    #     assert user_in_db is not None
-
 
 def test_login_and_protected_endpoint(client, populated_db):
     from models import User
@@ -633,3 +608,177 @@ def test_login_and_protected_endpoint(client, populated_db):
     )
     assert response2.status_code == 200
     assert response2.json()["content"] == "JWT Note"
+
+
+@patch("main.model.transcribe")
+def test_upload_audio_returns_structure(
+    mock_transcribe, client_with_data, in_memory_audio
+):
+    from main import app
+    from models import User
+    from dependencies import get_current_user
+
+    mock_transcribe.return_value = {
+        "text": "hello world",
+        "segments": [],
+        "language": "en",
+    }
+
+    app.dependency_overrides[get_current_user] = lambda: User(id=1, username="alice123")
+
+    response = client_with_data.post(
+        "/upload_audio/",
+        files={"file": ("test.wav", in_memory_audio, "audio/wav")},
+        headers={"token": "x"},
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+
+    assert "transcription" in data
+    assert data["transcription"] == "hello world"
+    assert "suggested_tags" in data
+    assert isinstance(data["suggested_tags"], list)
+
+    app.dependency_overrides.pop(get_current_user, None)
+
+
+def test_suggest_tags_matches_existing_tags(populated_db):
+    text = "This is about health and travel"
+
+    tags = suggest_tags_from_text(text, populated_db)
+
+    assert "health" in tags
+    assert "travel" in tags
+
+
+# def test_upload_audio_endpoint(client, populated_db, sample_audio_path, whisper_model):
+#     """
+#     Test /upload_audio/ endpoint with a sample audio file
+#     and populated test tags in the database.
+#     """
+#     # Override get_db dependency to use populated_db
+#     from main import model as main_model
+
+#     main_model = whisper_model
+#     from main import get_db, app
+
+#     app.dependency_overrides[get_db] = lambda: populated_db
+
+#     client = client(app)
+
+#     # Use a test token for your get_current_user
+#     headers = {"token": "test_token_for_user"}
+
+#     with open(sample_audio_path, "rb") as f:
+#         files = {"file": (os.path.basename(sample_audio_path), f, "audio/wav")}
+#         response = client.post("/upload_audio/", files=files, headers=headers)
+
+#     assert response.status_code == 200
+#     data = response.json()
+#     assert "transcription" in data
+#     assert "tags" in data
+#     assert isinstance(data["tags"], list)
+#     print("Transcription:", data["transcription"])
+#     print("Suggested tags:", data["tags"])
+
+
+# @patch("main.model.transcribe")
+# def test_upload_audio_mock_transcribe(
+#     client, mock_transcribe, populated_db, sample_audio_path
+# ):
+#     mock_transcribe.return_value = {
+#         "text": "This is a test note about health and travel"
+#     }
+
+#     from main import get_db, app
+
+#     app.dependency_overrides[get_db] = lambda: populated_db
+#     client = client(app)
+
+#     headers = {"token": "test_token_for_user"}
+#     with open(sample_audio_path, "rb") as f:
+#         files = {"file": (os.path.basename(sample_audio_path), f, "audio/wav")}
+#         response = client.post("/upload_audio/", files=files, headers=headers)
+
+#     assert response.status_code == 200
+#     data = response.json()
+#     assert "health" in " ".join(data["tags"]).lower()
+#     assert "travel" in " ".join(data["tags"]).lower()
+
+
+# def test_upload_audio_endpoint(client, populated_db, sample_audio_path, whisper_model):
+#     """
+#     Test /upload_audio/ endpoint with real Whisper model and sample audio.
+#     """
+#     # Use the updated client fixture with whisper_model override
+#     client = client(db=populated_db, whisper_model=whisper_model)
+
+#     headers = {"token": "test_token_for_user"}
+#     with open(sample_audio_path, "rb") as f:
+#         files = {"file": (os.path.basename(sample_audio_path), f, "audio/wav")}
+#         response = client.post("/upload_audio/", files=files, headers=headers)
+
+#     assert response.status_code == 200
+#     data = response.json()
+#     assert "transcription" in data
+#     assert "tags" in data
+#     assert isinstance(data["tags"], list)
+#     print("Transcription:", data["transcription"])
+#     print("Suggested tags:", data["tags"])
+
+
+# ------------------------------------------------------------------
+# Test /upload_audio/ with mocked Whisper transcription
+# ------------------------------------------------------------------
+# working, but real model, not ok to use no ral resuls !!!!!
+# def test_upload_audio_endpoint(client, in_memory_audio, whisper_model):
+#     import main
+
+#     main.model = whisper_model  # patch the global model for this test
+
+#     # Override auth to avoid 401
+#     from models import User
+
+#     client.app.dependency_overrides[main.get_current_user] = lambda: User(
+#         id=1, username="alice123"
+#     )
+
+#     headers = {"token": "anything"}
+#     files = {"file": ("test_note.wav", in_memory_audio, "audio/wav")}
+#     response = client.post("/upload_audio/", files=files, headers=headers)
+#     print("STATUS:", response.status_code)
+#     print("RESPONSE JSON:", response.json())
+#     print("RESPONSE TEXT:", response.text)
+
+#     assert response.status_code == 200
+
+
+# @patch("main.model.transcribe")
+# def test_upload_audio_mock_transcribe(
+#     mock_transcribe, client_with_data, in_memory_audio
+# ):
+#     """
+#     Test /upload_audio/ endpoint using mocked Whisper transcription.
+#     """
+#     from main import app
+#     from dependencies import get_current_user
+
+#     mock_transcribe.return_value = {
+#         "text": "This is a test note about health and travel"
+#     }
+
+#     # Bypass authentication
+#     app.dependency_overrides[get_current_user] = lambda: User(id=1, username="alice123")
+
+#     headers = {"token": "anything"}
+#     files = {"file": ("test_note.wav", in_memory_audio, "audio/wav")}
+#     response = client_with_data.post("/upload_audio/", files=files, headers=headers)
+
+#     assert response.status_code == 200
+#     data = response.json()
+#     assert "health" in " ".join(data["tags"]).lower()
+#     assert "travel" in " ".join(data["tags"]).lower()
+
+#     # Clean up auth override
+#     app.dependency_overrides.pop(get_current_user, None)
