@@ -140,20 +140,21 @@
     "Themes": ["Adventure", "Culture", "History"],
     "Food": []
   },
-  "Art": [
-    "Drawing",
-    "Painting",
-    "Music",
-    "Goldsmithing",
-    "Gardening",
-    "Crafts",
-    "Photography",
-    "Poetry",
-    "Knitting",
-    "Sculpting",
-    "Design"
-
-  ],
+  "Art": {
+    "Drawing": ["graphite", "pencil"],
+    "Painting": ["oil"],
+    "Music": ["Movie music"],
+    "Goldsmithing": ["jewellery", "technique"],
+    "Gardening": ["bonsai"],
+    "Crafts": ["DIY"],
+    "Photography": [],
+    "Poetry": [],
+    "Knitting": ["stitch"],
+    "Sculpting": ["stone"],
+    "Design": ["retro"],
+    "Artist": ["Beksinski"],
+    "Theater": []
+  },
   "Media": [
     "Movie",
     "TV Show",
@@ -207,8 +208,9 @@
     "Cryptocurrency",
     "Real Estate",
     "Personal Finance",
-    "shopping",
-    "Discount codes"
+    "Shopping",
+    "ETF",
+    "Bonds"
   ],
   "Education": [
     "Learning",
@@ -254,6 +256,7 @@
     "Names",
     "painting"
   ],
+  "Shopping": ["gift Ideas", "Discount codes"],
   "Trivia": ["Fun Facts"],
   "Events": ["Conferences", "Meetups", "Workshops", "Networking Events"],
 
