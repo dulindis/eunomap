@@ -153,12 +153,14 @@
     "Sculpting": ["stone"],
     "Design": ["retro"],
     "Artist": ["Beksinski"],
-    "Theater": []
+    "Theater": [],
+    "quotes": []
   },
   "Media": [
     "Movie",
     "TV Show",
     "Book",
+    ["quotes"],
     "Podcasts",
     "Music",
     "Streaming Services",
@@ -226,7 +228,9 @@
     "Interview Tips",
     "Networking",
     "Professional Development",
-    "Workplace Skills"
+    "Workplace Skills",
+    "People",
+    ["quotes"]
   ],
   "Cybersecurity": [
     "Cybersecurity",

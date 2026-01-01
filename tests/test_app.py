@@ -859,3 +859,25 @@ def test_suggest_tags_from_text_semantic_no_matches(populated_db):
 
     assert suggested == ["others"], f"Expected ['others'], got {suggested}"
     print("No match suggestions (fallback):", suggested)
+
+
+def test_normalize_hierarchy(test_hierarchy_path):
+    from utils import normalize_hierarchy
+    import json
+
+    # assert normalize_hierarchy({"a": {}}, 3) == {"a": {}}
+    # assert normalize_hierarchy({"a": ["x", "y"]}, 3) == {"a": {"x": {}, "y": {}}}
+    # assert normalize_hierarchy(["a", "b"], 3) == {"a": {}, "b": {}}
+    # assert normalize_hierarchy(["a", ["x", "y"], "b"], 3) == {
+    #     "a": {"x": {}, "y": {}},
+    #     "b": {},
+    # }
+
+    print(
+        "MORDECZKA!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+    )
+    file_path = test_hierarchy_path
+    with open(file_path, "r", encoding="utf-8") as f:
+        test_hierarchy = json.load(f)
+
+    assert normalize_hierarchy(test_hierarchy, 3)

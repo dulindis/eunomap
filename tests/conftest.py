@@ -116,6 +116,7 @@ def client_with_data(populated_db, whisper_model=None):
 def test_hierarchy_path():
     """Path to the test hierarchy JSON file."""
     return "tests/test_hierarchy.json"
+    # return "tests/hierarchy.json"
 
 
 @pytest.fixture

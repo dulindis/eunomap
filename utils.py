@@ -20,10 +20,10 @@ from models import Tag
 # =============================================================================
 
 # Inflect engine for pluralization/singularization
-_inflect = inflect.engine()
+# _inflect = inflect.engine()
 
 # Load a small embedding model once
-embed_model = SentenceTransformer("all-MiniLM-L6-v2")  # fast, small
+# embed_model = SentenceTransformer("all-MiniLM-L6-v2")  # fast, small
 
 DO_NOT_SINGULARIZE = {
     "news",
@@ -47,6 +47,8 @@ DO_NOT_SINGULARIZE = {
     "tricks",
     "others",
     "tips_and_tricks",
+    "nodejs",
+    "kids",  # ?? child
 }
 
 # Explicit aliases for things that should unify
@@ -217,9 +219,46 @@ def normalize(text: str) -> str:
 # =============================================================================
 
 
+# def load_hierarchy(file_path: str = "hierarchy.json") -> dict:
+#     with open(file_path, "r", encoding="utf-8") as f:
+#         return json.load(f)
+
+
+def normalize_hierarchy(node, max_depth):
+    print(f"node={node} max_depth={max_depth}")
+
+    if max_depth == 0:
+        raise RuntimeError("Max depth reached")
+
+    next_max_depth = max_depth - 1
+
+    if isinstance(node, dict):
+        return {k: normalize_hierarchy(v, next_max_depth) for (k, v) in node.items()}
+    elif isinstance(node, list):
+        n = len(node)
+        i = 0
+        dst = {}
+        while i < n:
+            x = node[i]
+            if isinstance(x, str):
+                if i < n - 1 and (
+                    isinstance(node[i + 1], list) or isinstance(node[i + 1], dict)
+                ):
+                    dst[x] = normalize_hierarchy(node[i + 1], next_max_depth)
+                    i += 2
+                else:
+                    dst[x] = {}
+                    i += 1
+            else:
+                raise RuntimeError("Syntax error B")
+        return dst
+    else:
+        raise RuntimeError("Syntax error C")
+
+
 def load_hierarchy(file_path: str = "hierarchy.json") -> dict:
     with open(file_path, "r", encoding="utf-8") as f:
-        return json.load(f)
+        return normalize_hierarchy(json.load(f), 3)
 
 
 def flatten_all_tags(node) -> list[str]:
@@ -674,7 +713,7 @@ def suggest_tags_from_text_semantic(
         ]
 
         sem_candidates.sort(key=lambda x: x[0], reverse=True)
-
+        # TODO: make sure that the synonym doesnt exist in extact matches
         for _, tag in sem_candidates:
             if len(suggestions) >= MAX_TAGS:
                 break

@@ -164,6 +164,7 @@ def upload_image(
     tags: str = Form(...),
     db: Session = Depends(get_db),
 ):
+    # TODO: max img size here - aybe rename the note name plus id of the note
     ext = Path(file.filename).suffix.lower()
     note = Note(media_type="image")
     db.add(note)
