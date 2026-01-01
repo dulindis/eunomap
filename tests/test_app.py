@@ -862,22 +862,22 @@ def test_suggest_tags_from_text_semantic_no_matches(populated_db):
 
 
 def test_normalize_hierarchy(test_hierarchy_path):
-    from utils import normalize_hierarchy
+    from utils import normalize_hierarchy, compress_hierarchy
     import json
 
-    # assert normalize_hierarchy({"a": {}}, 3) == {"a": {}}
-    # assert normalize_hierarchy({"a": ["x", "y"]}, 3) == {"a": {"x": {}, "y": {}}}
-    # assert normalize_hierarchy(["a", "b"], 3) == {"a": {}, "b": {}}
-    # assert normalize_hierarchy(["a", ["x", "y"], "b"], 3) == {
-    #     "a": {"x": {}, "y": {}},
-    #     "b": {},
-    # }
+    assert normalize_hierarchy({"a": {}}, 3) == {"a": {}}
+    assert normalize_hierarchy({"a": ["x", "y"]}, 3) == {"a": {"x": {}, "y": {}}}
+    assert normalize_hierarchy(["a", "b"], 3) == {"a": {}, "b": {}}
+    assert normalize_hierarchy(["a", ["x", "y"], "b"], 3) == {
+        "a": {"x": {}, "y": {}},
+        "b": {},
+    }
 
-    print(
-        "MORDECZKA!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-    )
     file_path = test_hierarchy_path
     with open(file_path, "r", encoding="utf-8") as f:
         test_hierarchy = json.load(f)
 
-    assert normalize_hierarchy(test_hierarchy, 3)
+    hierarchy = normalize_hierarchy(test_hierarchy, 5)
+
+    with open("normed_hierarchy.json", "w", encoding="utf-8") as f:
+        json.dump(compress_hierarchy(hierarchy), f, indent=2)
