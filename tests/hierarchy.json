@@ -82,6 +82,8 @@
       "Osteoporosis"
     ]
   },
+  "Bodily Fluids": ["Blood", "Pee", "Vomit", "Poo"],
+
   "Pets": [
     "Dogs",
     "Cats",
@@ -115,14 +117,18 @@
   "Cosmetics": [
     "Makeup",
     "Skincare",
+    ["Soap"],
     "Haircare",
+    ["Conditioner", "Shampoo"],
     "Fragrance",
     "Beauty Tips",
-    "Product Reviews",
-    "Tested",
-    "To Test",
-    "Favorite Products"
+    "Products",
+    ["Tested", "To Test", "moisturizing", "emolient", "protein"]
   ],
+  "Household": {
+    "Washing": ["Detergent"],
+    "Cleaning": []
+  },
   "Travel": {
     "General": ["Tips", "Itineraries", "Where to Eat", "Events", "Festivals"],
     "Places": [
@@ -168,19 +174,23 @@
     "Music",
     "Publishing",
     "Author",
-    "Blog"
+    "Blog",
+    "Audiobook"
   ],
   "Food": {
     "Cooking": ["Baking", "Tips"],
     "Recipes": ["Cakes", "Snacks", "Drinks"],
     "Ingredients": [
       "Interesting Products",
-      "Fruit & Vegetables",
-      "Meat & Seafood",
-      "Cheeses",
-      "Drinks"
+      "Fruit",
+      "Vegetables",
+      "Cheese",
+      "Drinks",
+      "Oil",
+      "Meat",
+      "Seafood"
     ],
-    "Dining": ["Restaurants", "Cafe"]
+    "Dining": ["Restaurants", "Cafe", "Streetfood"]
   },
   "Technology": {
     "General": [
@@ -239,6 +249,7 @@
     "Data Protection",
     "Privacy",
     "Network Security",
+    ["Router"],
     "Ethical Hacking",
     "Passwords",
     "Cryptography",
