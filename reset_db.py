@@ -1,5 +1,5 @@
 # reset_db.py
-from database import Base, engine
+from db import Base, engine
 
 # Drop all tables
 Base.metadata.drop_all(bind=engine)

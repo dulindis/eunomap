@@ -1,4 +1,3 @@
-import os
 from contextlib import contextmanager
 from typing import Generator
 
@@ -8,6 +7,9 @@ from sqlalchemy.orm import sessionmaker, Session
 
 from config import Config
 
+from utils.hierarchy_utils import load_hierarchy
+from utils.tag_utils import add_tags
+from base import Base
 
 SQLALCHEMY_DATABASE_URL = Config.DATABASE_URL
 
@@ -41,7 +43,7 @@ def set_sqlite_pragma(dbapi_conn, connection_record):
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # Base class for models
-Base = declarative_base()
+# Base = declarative_base()
 
 # =============================================================================
 # Database Operations
@@ -117,7 +119,6 @@ def load_initial_data(max_retries: int = 3):
     """
     import time
     from sqlalchemy.exc import OperationalError
-    from utils import load_hierarchy, add_tags
 
     for attempt in range(max_retries):
         try:

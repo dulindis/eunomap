@@ -1,7 +1,7 @@
 from fastapi import Depends, HTTPException, Header
 from requests import Session
 from auth import verify_access_token
-from database import get_db
+from db import get_db
 from models import User
 
 

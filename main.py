@@ -14,21 +14,17 @@ import whisper
 
 from auth import create_access_token, verify_access_token
 from config import Config
-import database
+import db
 from models import Note, User, Tag
 from schemas import NoteCreate, NoteOut, UserCreate, UserOut
-from database import get_db, init_db, reset_db
+from db import get_db, init_db, reset_db
 from dependencies import get_current_user
-from utils import (
-    flatten_hierarchy,
-    get_or_create_tag,
-    hash_password,
-    load_hierarchy,
-    save_upload,
-    add_user,
-    suggest_tags_from_text_semantic,
-    verify_password,
-)
+from utils.user_utils import add_user
+from utils.password_utils import hash_password, verify_password
+from utils.hierarchy_utils import load_hierarchy, flatten_hierarchy
+from utils.note_utils import save_upload
+from utils.tag_utils import get_or_create_tag, suggest_tags_from_text_semantic
+
 
 UPLOAD_DIR = Path("static/uploads")
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
@@ -62,7 +58,7 @@ async def lifespan(app: FastAPI):
 
     # Load hierarchy data
     try:
-        database.load_initial_data()
+        db.load_initial_data()
     except Exception as e:
         print(f"❌ Error loading hierarchy: {e}")
 
@@ -72,7 +68,7 @@ async def lifespan(app: FastAPI):
 
     # Shutdown
     print("👋 Shutting down application...")
-    database.engine.dispose()
+    db.engine.dispose()
 
 
 app = FastAPI(lifespan=lifespan)

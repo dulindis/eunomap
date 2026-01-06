@@ -1,14 +1,18 @@
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, ConfigDict
 from typing import List, Optional
 
 from sqlalchemy import Boolean, Column, Integer, String
 
-from database import Base
+from db import Base
 
 
 # --- Input Schemas (What you send) ---
 class TagCreate(BaseModel):
     name: str
+
+
+class TagResolveInput(BaseModel):
+    label: str
 
 
 class NoteCreate(BaseModel):
@@ -18,10 +22,12 @@ class NoteCreate(BaseModel):
 
 # --- Output Schemas (What the API replies with) ---
 class TagOut(BaseModel):
-    name: str
+    id: int
+    label: str
+    path: str
 
     class Config:
-        orm_mode = True
+        model_config = ConfigDict(from_attributes=True)
 
 
 class NoteOut(BaseModel):
@@ -29,11 +35,11 @@ class NoteOut(BaseModel):
     content: Optional[str]
     media_path: Optional[str]
     media_type: str
-    # tags: List[TagOut]
-    tags: List[TagOut] = []
+    tags: List[TagOut]
+    # tags: List[TagOut] = []
 
     class Config:
-        orm_mode = True
+        model_config = ConfigDict(from_attributes=True)
 
 
 class UserCreate(BaseModel):
@@ -49,4 +55,4 @@ class UserOut(BaseModel):
     is_active: bool
 
     class Config:
-        orm_mode = True
+        model_config = ConfigDict(from_attributes=True)

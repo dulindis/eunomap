@@ -2,7 +2,7 @@ import os
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 import tempfile
-from database import Base
+from db import Base
 
 
 def create_test_engine():

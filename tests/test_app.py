@@ -4,14 +4,20 @@ from unittest.mock import patch
 from sqlalchemy import select, func
 from dependencies import get_current_user
 from utils import (
-    load_hierarchy,
-    normalize,
     add_tags,
     get_or_create_tag,
     suggest_tags_from_text,
     suggest_tags_from_text_semantic,
 )
 from models import Tag, Note, note_tags, tag_parents, User
+
+from utils.password_utils import hash_password
+from utils.hierarchy_utils import (
+    load_hierarchy,
+    normalize_hierarchy,
+    compress_hierarchy,
+)
+from utils.tag_utils import add_tags, tag_processor
 
 
 def test_print_tags(populated_db):
@@ -61,7 +67,9 @@ def test_note_tag_association(populated_db):
         "c#",
         "tips & tricks",
     ]:
-        tag = populated_db.query(Tag).filter_by(name=normalize(name)).one()
+        tag = (
+            populated_db.query(Tag).filter_by(name=tag_processor.normalize(name)).one()
+        )
         note.tags.append(tag)
 
     populated_db.add(note)
@@ -80,7 +88,9 @@ def test_note_creates_missing_tag(populated_db):
 
     missing_tag_name = "NewTag"
     assert (
-        populated_db.query(Tag).filter_by(name=normalize(missing_tag_name)).first()
+        populated_db.query(Tag)
+        .filter_by(name=tag_processor.normalize(missing_tag_name))
+        .first()
         is None
     )
 
@@ -88,9 +98,13 @@ def test_note_creates_missing_tag(populated_db):
 
     # Attach the tag: if add_tags logic is used in your app, you might call that here
     # For this test, we'll mimic auto-create behavior
-    tag = populated_db.query(Tag).filter_by(name=normalize(missing_tag_name)).first()
+    tag = (
+        populated_db.query(Tag)
+        .filter_by(name=tag_processor.normalize(missing_tag_name))
+        .first()
+    )
     if tag is None:
-        tag = Tag(name=normalize(missing_tag_name))
+        tag = Tag(name=tag_processor.normalize(missing_tag_name))
         populated_db.add(tag)
         populated_db.commit()
         populated_db.refresh(tag)
@@ -103,16 +117,16 @@ def test_note_creates_missing_tag(populated_db):
     # Assertions
     # 1️⃣ Note has the tag
     assert len(note.tags) == 1
-    assert note.tags[0].name == normalize(missing_tag_name)
+    assert note.tags[0].name == tag_processor.normalize(missing_tag_name)
 
     # 2️⃣ Tag exists in DB
     tag_in_db = (
         populated_db.query(Tag)
-        .filter_by(name=normalize(missing_tag_name))
+        .filter_by(name=tag_processor.normalize(missing_tag_name))
         .one_or_none()
     )
     assert tag_in_db is not None
-    assert tag_in_db.name == normalize(missing_tag_name)
+    assert tag_in_db.name == tag_processor.normalize(missing_tag_name)
 
     # 3️⃣ Association table has a row
     # row_count = db.execute(select("note_tags")).fetchall()
@@ -130,7 +144,11 @@ def test_full_note_flow(populated_db):
     note = Note(content=content, media_type=media_type)
 
     for name in tags:
-        tag = populated_db.query(Tag).filter_by(name=normalize(name)).first()
+        tag = (
+            populated_db.query(Tag)
+            .filter_by(name=tag_processor.normalize(name))
+            .first()
+        )
         assert tag is not None
         note.tags.append(tag)
 
@@ -190,7 +208,7 @@ def test_create_note_with_new_tag(populated_db, client):
     assert note.content == "Test note"
 
     # --- Check tag auto-created ---
-    tag_name = normalize("newtag")
+    tag_name = tag_processor.normalize("newtag")
     tag = populated_db.query(Tag).filter_by(name=tag_name).first()
     print("Tag:", tag)
     print("Parents objects:", tag.parents)
@@ -581,7 +599,6 @@ def test_github_oauth(client, populated_db):
 
 def test_login_and_protected_endpoint(client, populated_db):
     from models import User
-    from utils import hash_password
 
     # Add test user
     user = User(
@@ -802,7 +819,7 @@ def test_suggest_tags_from_text_semantic_realistic(populated_db):
       - fallback to 'others'
       - respects selected tags
     """
-    from utils import suggest_tags_from_text_semantic, normalize
+    from utils import suggest_tags_from_text_semantic
 
     db_tags = populated_db.query(Tag).all()
 
@@ -843,7 +860,9 @@ def test_suggest_tags_from_text_semantic_realistic(populated_db):
 
     # Already selected tags should NOT appear
     for t in selected_tags:
-        assert normalize(t) not in [normalize(s) for s in suggested4]
+        assert tag_processor.normalize(t) not in [
+            tag_processor.normalize(s) for s in suggested4
+        ]
     print("Suggestions excluding selected tags:", suggested4)
 
 
@@ -862,7 +881,6 @@ def test_suggest_tags_from_text_semantic_no_matches(populated_db):
 
 
 def test_normalize_hierarchy(test_hierarchy_path):
-    from utils import normalize_hierarchy, compress_hierarchy
     import json
 
     assert normalize_hierarchy({"a": {}}, 3) == {"a": {}}

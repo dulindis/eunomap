@@ -1,18 +1,21 @@
 import re
-
 from sqlalchemy import (
-    Boolean,
     Column,
+    Boolean,
+    DateTime,
     Integer,
     String,
-    Text,
-    DateTime,
     ForeignKey,
     Table,
+    Text,
+    UniqueConstraint,
 )
 from sqlalchemy.orm import relationship, validates
 from datetime import datetime, timezone
-from database import Base
+
+# from db import Base
+from base import Base
+
 
 # Association Table (The bridge between Notes and Tags)
 note_tags = Table(
@@ -28,9 +31,15 @@ class Note(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     content = Column(Text, nullable=True)  # The text note
+
     media_path = Column(String, nullable=True)  # "static/uploads/image.png"
     media_type = Column(String, default="text")  # text, image, pdf
-    created_at = Column(DateTime, default=datetime.utcnow())
+
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    owner_id = Column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=True
+    )
 
     # Relationship: One Note can have Many Tags
     tags = relationship(
@@ -40,37 +49,48 @@ class Note(Base):
         passive_deletes=True,
     )
 
-    owner_id = Column(
-        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=True
-    )
     owner = relationship("User", back_populates="notes")
-
-
-tag_parents = Table(
-    "tag_parents",
-    Base.metadata,
-    Column("child_id", Integer, ForeignKey("tags.id", ondelete="CASCADE")),
-    Column("parent_id", Integer, ForeignKey("tags.id", ondelete="CASCADE")),
-)
 
 
 class Tag(Base):
     __tablename__ = "tags"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, unique=True, index=True)
-    # parent_id = Column(Integer, ForeignKey("tags.id"), nullable=True)
 
-    # Self-referential relationships
-    # parent = relationship("Tag", remote_side=[id], backref="children")
-    parents = relationship(
+    # Human-readable label (NOT unique)
+    label = Column(String, index=True, nullable=False)  # i.e  e.g. "mental_health"
+    key = Column(String, nullable=False)  # same as label; stable
+
+    # Materialized path, e.g. "/pets/health"
+    path = Column(
+        String, index=True, nullable=False
+    )  # path: composed of slug segments, e.g. "/health/mental-health"
+
+    # Tree structure
+    parent_id = Column(
+        Integer, ForeignKey("tags.id", ondelete="CASCADE"), nullable=True
+    )
+    # Relationships
+    parent = relationship(
         "Tag",
-        secondary=tag_parents,
-        primaryjoin=id == tag_parents.c.child_id,
-        secondaryjoin=id == tag_parents.c.parent_id,
+        remote_side=[id],
         backref="children",
     )
-    notes = relationship("Note", secondary=note_tags, back_populates="tags")
+
+    notes = relationship(
+        "Note",
+        secondary="note_tags",
+        back_populates="tags",
+    )
+
+    __table_args__ = (
+        # Enforce uniqueness only among siblings
+        # (same parent cannot have two "Health")
+        UniqueConstraint(
+            "parent_id", "key", name="uq_tag_sibling_key"
+        ),  # This guarantees your hierarchy cannot become inconsistent.
+        {},
+    )
 
 
 class User(Base):

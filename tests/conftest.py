@@ -7,9 +7,13 @@ import struct
 from fastapi.testclient import TestClient
 
 from main import app
-from database import get_db
+from db import get_db
 from tests.test_database import create_test_engine, create_session
-from utils import add_tags, add_user, add_users, load_hierarchy, normalize, SAMPLE_USERS
+from utils import add_tags
+
+from utils.user_utils import add_users, SAMPLE_USERS
+from utils.hierarchy_utils import load_hierarchy
+from utils.tag_utils import add_tags, tag_processor
 import pytest
 import whisper
 
@@ -189,7 +193,7 @@ def expected_tag_names():
     ]
 
     # Apply normalize() to all tags
-    return {normalize(name) for name in raw_tags}
+    return {tag_processor.normalize(name) for name in raw_tags}
 
 
 @pytest.fixture

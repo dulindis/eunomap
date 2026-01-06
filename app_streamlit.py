@@ -1,15 +1,13 @@
-import streamlit as st
+from io import BytesIO
+import json
 import requests
+
+import streamlit as st
 from datetime import datetime
 from PIL import Image
-from io import BytesIO
-from utils import (
-    load_hierarchy,
-    flatten_all_tags,
-    get_suggestions,
-    build_flat_mapping,
-)
-import json
+from utils import get_suggestions
+from utils.hierarchy_utils import build_flat_mapping, flatten_all_tags, load_hierarchy
+
 from streamlit_tags import st_tags
 
 # --- CONFIG ---

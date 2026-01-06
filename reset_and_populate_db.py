@@ -1,6 +1,6 @@
 # from sqlalchemy.orm import Session
 # from models import Tag
-# from database import SessionLocal
+# from db import SessionLocal
 # import json
 
 # with open("hierarchy.json", "r", encoding="utf-8") as f:

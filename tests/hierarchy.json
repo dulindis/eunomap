@@ -175,7 +175,8 @@
     "Publishing",
     "Author",
     "Blog",
-    "Audiobook"
+    "Audiobook",
+    "Games"
   ],
   "Food": {
     "Cooking": ["Baking", "Tips"],
@@ -261,7 +262,8 @@
     "Activities",
     "Health",
     "Nutrition",
-    "Development"
+    "Development",
+    "Games"
   ],
   "Ideas": [
     "Startup Ideas",
