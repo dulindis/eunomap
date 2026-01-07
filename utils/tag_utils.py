@@ -3,7 +3,7 @@ import unicodedata
 
 from sqlalchemy.orm import Session
 
-from models import Tag
+from models import Tag, TagStats
 
 
 # =============================================================================
@@ -135,6 +135,8 @@ ALIASES = {
     "ciekawostki": "trivia",
     # taxonomy prefereces:
     "children": "kids",
+    "perfume": "fragrance",
+    "scent": "fragrance",
 }
 
 
@@ -557,3 +559,31 @@ def suggest_tags_from_text(
         key=lambda t: text_norm.count(tag_processor.normalize(t)),
         reverse=True,
     )
+
+
+def get_trending_tags(db, limit: int = 20):
+    q = (
+        db.query(Tag, TagStats)
+        .join(TagStats, TagStats.tag_id == Tag.id)
+        .order_by((TagStats.last_24h_count / (TagStats.total_count + 1.0)).desc())
+        .limit(limit)
+    )
+    return [
+        TagOut(
+            id=tag.id,
+            label=tag.label,
+            path=tag.path,
+            stats=TagStatsOut(
+                total_count=stats.total_count,
+                last_24h_count=stats.last_24h_count,
+                last_7d_count=stats.last_7d_count,
+                trending_score=(
+                    stats.last_24h_count / (stats.total_count + 1.0)
+                    if stats.total_count is not None
+                    else None
+                ),
+                last_used_at=stats.last_used_at,
+            ),
+        )
+        for tag, stats in q.all()
+    ]

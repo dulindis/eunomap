@@ -8,7 +8,20 @@
     "Chinese",
     "Swedish",
     "English",
-    "ciekawostki jezykowe"
+    "Japanese",
+    "Korean",
+    "Arabic",
+    "Polish",
+    "Norwegian",
+    "Finnish",
+    "Czech",
+    "ciekawostki jezykowe",
+    "Etymology",
+    "Linguistics",
+    "Pronunciation",
+    "Slang",
+    "Translation",
+    "Language Learning Tips"
   ],
   "Health": {
     "Doctor": [
@@ -18,13 +31,46 @@
       "Psychiatrist",
       "Pediatrician",
       "Endocrinologist",
-      "Surgeon"
+      "Surgeon",
+      "Dentist",
+      "Ophthalmologist",
+      "Gynecologist",
+      "Physiotherapist"
     ],
-    "Medication": ["Drug", "Supplement", "Natural Remedy"],
-    "Nutrition": ["Dieting", "Healthy Eating", "Superfood"],
-    "Wellness": ["Longevity", "Wellbeing"],
+    "Medication": [
+      "Drug",
+      "Supplement",
+      "Natural Remedy",
+      "Herbs",
+      "Painkillers",
+      "Vaccines",
+      "Antibiotics"
+    ],
+    "Nutrition": [
+      "Dieting",
+      "Healthy Eating",
+      "Superfood",
+      "Intermittent Fasting",
+      "Hydration"
+    ],
+    "Wellness": [
+      "Longevity",
+      "Wellbeing",
+      "Sleep",
+      "Self-care",
+      "Balance",
+      "Detox"
+    ],
     "Therapy": ["Physical Therapy", "Psychotherapy"],
-    "Mental Health": ["Anxiety", "Depression", "ADHD", "Stress"],
+    "Mental Health": [
+      "Anxiety",
+      "Depression",
+      "ADHD",
+      "Stress",
+      "Burnout",
+      "Sleep Disorders",
+      "Mindfulness"
+    ],
     "Body": [
       "Head",
       "Brain",
@@ -57,7 +103,9 @@
       "Ankles",
       "Feet",
       "Skin",
-      "Hormones"
+      "Hormones",
+      "Joints",
+      "Muscles"
     ],
     "Diseases": [
       "Diabetes",
@@ -79,14 +127,27 @@
       "Chronic Kidney Disease",
       "Liver Disease",
       "HIV/AIDS",
-      "Osteoporosis"
+      "Osteoporosis",
+      "Autoimmune Disorders",
+      "Allergies",
+      "Skin Conditions"
     ]
   },
-  "Bodily Fluids": ["Blood", "Pee", "Vomit", "Poo"],
+  "Bodily Fluids": [
+    "Blood",
+    "Pee",
+    "Vomit",
+    "Poo",
+    "Sweat",
+    "Saliva",
+    "Tears",
+    "Mucus"
+  ],
 
   "Pets": [
     "Dogs",
     "Cats",
+    "Wildlife",
     "Animal Health",
     "Pet Care",
     "Animal Nutrition",
@@ -103,7 +164,10 @@
     "Diet",
     "Hiking",
     "Outdoors",
-    "Kayaking"
+    "Kayaking",
+    "Running",
+    "Stretching",
+    "Home Workouts"
   ],
   "Fashion": [
     "Clothes Brands",
@@ -112,7 +176,10 @@
     "Fashion",
     "Style",
     "Inspiration",
-    "Trends"
+    "Trends",
+    "Inspiration",
+    "Sustainable Fashion",
+    "Vintage Style"
   ],
   "Cosmetics": [
     "Makeup",
@@ -123,44 +190,106 @@
     "Fragrance",
     "Beauty Tips",
     "Products",
-    ["Tested", "To Test", "moisturizing", "emolient", "protein"]
+    [
+      "Tested",
+      "To Test",
+      "moisturizing",
+      "emolient",
+      "protein",
+      "Anti-aging",
+      "Sun Protection"
+    ]
   ],
   "Household": {
-    "Washing": ["Detergent"],
-    "Cleaning": []
+    "Washing": ["Detergent", "Laundry Care", "Fabric Softener"],
+    "Cleaning": [
+      "Eco-friendly Cleaners",
+      "Decluttering",
+      "Home Maintenance",
+      "Disinfection",
+      "Odor Control"
+    ],
+    "Home Improvement": [
+      "DIY Projects",
+      "Repairs",
+      "Interior Design",
+      "Home Safety",
+      "Furniture"
+    ]
   },
   "Travel": {
-    "General": ["Tips", "Itineraries", "Where to Eat", "Events", "Festivals"],
+    "General": [
+      "Tips",
+      "Itineraries",
+      "Where to Eat",
+      "Events",
+      "Festivals",
+      "Travel Safety",
+      "Budget Travel",
+      "Solo Travel"
+    ],
     "Places": [
       "Poland",
       "Europe",
       "Asia",
-      "south America",
+      "South America",
       "North America",
       "Africa",
       "Australia",
       "Antarctica",
       "Greenland",
-      "Monuments"
+      "Monuments",
+      "National Parks",
+      "Cities",
+      "Islands"
     ],
-    "Themes": ["Adventure", "Culture", "History"],
-    "Food": []
+    "Themes": [
+      "Adventure",
+      "Culture",
+      "History",
+      "Nature",
+      "Luxury",
+      "Road Trips"
+    ],
+    "Food": ["Street Food", "Local Dishes", "Drinks"]
   },
   "Art": {
-    "Drawing": ["graphite", "pencil"],
-    "Painting": ["oil"],
-    "Music": ["Movie music"],
-    "Goldsmithing": ["jewellery", "technique"],
-    "Gardening": ["bonsai"],
-    "Crafts": ["DIY"],
-    "Photography": [],
-    "Poetry": [],
-    "Knitting": ["stitch"],
-    "Sculpting": ["stone"],
-    "Design": ["retro"],
-    "Artist": ["Beksinski"],
-    "Theater": [],
-    "quotes": []
+    "Drawing": ["Graphite", "Pencil", "Digital"],
+    "Painting": ["Oil", "Watercolor", "Acrylic"],
+    "Music": [
+      "Movie Music",
+      "Rock",
+      "Metal",
+      "Folk",
+      "Nordic",
+      "Classical",
+      "Jazz"
+    ],
+    "Goldsmithing": ["Jewellery", "Technique", "Metals"],
+    "Gardening": ["Bonsai", "Landscaping", "Indoor Plants"],
+    "Crafts": ["DIY", "Paper Art", "Embroidery"],
+    "Photography": [
+      "Portrait",
+      "Landscape",
+      "Film",
+      "Editing",
+      "Lighting",
+      "Equipment"
+    ],
+    "Poetry": ["Haiku", "Rhymes", "Themes", "Modern Poetry", "Quotes"],
+    "Knitting": ["Stitch", "Patterns"],
+    "Sculpting": ["Stone", "Clay", "Wood"],
+    "Design": ["retro", "typography"],
+    "Artist": [
+      "Beksinski",
+      "van Gogh",
+      "Monet",
+      "Picasso",
+      "Bierstadt",
+      "church"
+    ],
+    "Theater": ["musicals", "plays"],
+    "Quotes": []
   },
   "Media": [
     "Movie",
@@ -176,11 +305,24 @@
     "Author",
     "Blog",
     "Audiobook",
-    "Games"
+    "Games",
+    "Animation",
+    "manga",
+    "anime",
+    "Reviews",
+    "Comic"
   ],
   "Food": {
-    "Cooking": ["Baking", "Tips"],
-    "Recipes": ["Cakes", "Snacks", "Drinks"],
+    "Cooking": ["Baking", "Tips", "Grilling", "Fermentation", "Meal Prep"],
+    "Recipes": [
+      "Cakes",
+      "Snacks",
+      "Drinks",
+      "Soups",
+      "Salads",
+      "Main Courses",
+      "Desserts"
+    ],
     "Ingredients": [
       "Interesting Products",
       "Fruit",
@@ -189,9 +331,19 @@
       "Drinks",
       "Oil",
       "Meat",
-      "Seafood"
+      "Seafood",
+      "Spices",
+      "Herbs",
+      "Nuts",
+      "Grains"
     ],
-    "Dining": ["Restaurants", "Cafe", "Streetfood"]
+    "Dining": [
+      "Restaurants",
+      "Cafe",
+      "Street Food",
+      "Fine Dining",
+      "Food Trucks"
+    ]
   },
   "Technology": {
     "General": [
@@ -200,19 +352,35 @@
       "Web Development",
       "Mobile Apps",
       "AI/ML",
+      ["RAG", "agentic", "genAI"],
       "Software Programs",
       "Equipment",
-      "Design"
+      "Design",
+      "3D Printing",
+      "Electronics",
+      "Innovation",
+      "website"
     ],
-    "Software Development": ["Programming Basics", "Algorithms", "DevOps"],
+    "Software Development": [
+      "Programming Basics",
+      "Algorithms",
+      "DevOps",
+      "APIs",
+      "Version Control",
+      "Testing"
+    ],
     "Programming Languages": [
       "C#",
       "Python",
       "JavaScript",
       "Java",
       "React",
-      "Node.js"
-    ]
+      "Node.js",
+      "C++",
+      "Rust",
+      "TypeScript"
+    ],
+    "Trends": ["Blockchain", "IoT", "Cloud Computing", "Automation", "Agentic"]
   },
   "Finance": [
     "Investing",
@@ -222,8 +390,15 @@
     "Real Estate",
     "Personal Finance",
     "Shopping",
+    ["discount code"],
     "ETF",
-    "Bonds"
+    "Bonds",
+    "Retirement Planning",
+    "Taxes",
+    "Financial Literacy",
+    "Wealth Management",
+    "business",
+    ["business advice", "startup", "name idea"]
   ],
   "Education": [
     "Learning",
@@ -231,18 +406,22 @@
     "Online Education",
     "Skill Development",
     "Workshops",
-    "Seminars"
+    "Seminars",
+    "study tips",
+    "research",
+    "Motivation"
   ],
   "Career": [
     "Job Search",
     "Resume Building",
     "Interview Tips",
     "Networking",
-    ["people"],
+    ["people", "meetups"],
     "Professional Development",
     "Workplace Skills",
     "People",
-    ["quotes"]
+    ["quotes"],
+    "Career Change"
   ],
   "Cybersecurity": [
     "Cybersecurity",
@@ -254,7 +433,10 @@
     "Ethical Hacking",
     "Passwords",
     "Cryptography",
-    "Programs"
+    "Programs",
+    "Phishing",
+    "Online Safety",
+    "Dark Web"
   ],
   "Kids": [
     "Parenting",
@@ -263,7 +445,9 @@
     "Health",
     "Nutrition",
     "Development",
-    "Games"
+    "Games",
+    "Crafts",
+    "Storytelling"
   ],
   "Ideas": [
     "Startup Ideas",
@@ -272,11 +456,29 @@
     "Innovation",
     "Brainstorming",
     "Names",
-    "painting"
+    "painting",
+    "Painting",
+    "Creativity",
+    "Inventions",
+    "crafts",
+    "business"
   ],
-  "Shopping": ["gift Ideas", "Discount codes"],
-  "Trivia": ["Fun Facts"],
-  "Events": ["Conferences", "Meetups", "Workshops", "Networking Events"],
-
-  "Others": []
+  "Shopping": [
+    "Gift Ideas",
+    "Discount Codes",
+    "Reviews",
+    "Sustainable Products"
+  ],
+  "Trivia": ["Fun Facts", "History Facts", "Science Facts", "Cultural Facts"],
+  "Events": [
+    "Conferences",
+    "Meetups",
+    "Workshops",
+    "Networking Events",
+    "Exhibitions",
+    "Festivals",
+    "Webinars"
+  ],
+  "Humor": ["jokes", "memes", "funny images"],
+  "Others": ["Lifestyle", "Hobbies"]
 }

@@ -20,11 +20,20 @@ class NoteCreate(BaseModel):
     tags: List[str] = []  # List of tag names, e.g. ["doctors", "health"]
 
 
+class TagStatsOut(BaseModel):
+    total_count: int | None = None
+    last_24h_count: int | None = None
+    last_7d_count: int | None = None
+    trending_score: float | None = None
+    last_used_at: datetime | None = None
+
+
 # --- Output Schemas (What the API replies with) ---
 class TagOut(BaseModel):
     id: int
     label: str
     path: str
+    stats: TagStatsOut | None = None
 
     class Config:
         model_config = ConfigDict(from_attributes=True)

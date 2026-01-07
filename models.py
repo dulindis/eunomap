@@ -9,6 +9,7 @@ from sqlalchemy import (
     Table,
     Text,
     UniqueConstraint,
+    func,
 )
 from sqlalchemy.orm import relationship, validates
 from datetime import datetime, timezone
@@ -93,6 +94,48 @@ class Tag(Base):
     )
 
 
+class TagUsage(Base):
+    __tablename__ = "tag_usage"
+
+    id = Column(Integer, primary_key=True)
+    tag_id = Column(
+        Integer, ForeignKey("tags.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+
+    # When this tag was used (e.g. note created / tag added)
+    used_at = Column(DateTime(timezone=True), server_default=func.now(), index=True)
+
+    tag = relationship("Tag", backref="usage_events")
+
+
+class TagStats(Base):
+    __tablename__ = "tag_stats"
+
+    tag_id = Column(
+        Integer, ForeignKey("tags.id", ondelete="CASCADE"), primary_key=True
+    )
+
+    # All-time count
+    total_count = Column(Integer, nullable=False, default=0)
+
+    # Recent window counts (tune to your needs)
+    last_24h_count = Column(Integer, nullable=False, default=0)
+    last_7d_count = Column(Integer, nullable=False, default=0)
+
+    # Last time this tag was used
+    last_used_at = Column(DateTime(timezone=True), nullable=True)
+
+    tag = relationship("Tag", backref="stats")
+
+
+# When a note is created or a tag is attached to a note:
+
+# Insert into note_tags (your join table).
+
+# Insert one row into tag_usage per tag.
+
+
+# Later you can aggregate counts per time bucket in SQL (e.g. “last 24h”).
 class User(Base):
     __tablename__ = "users"
 

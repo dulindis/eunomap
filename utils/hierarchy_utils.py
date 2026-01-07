@@ -2,7 +2,7 @@ import json
 
 from sqlalchemy.orm import Session
 
-from utils.tag_utils import tag_processor
+from utils.tag_utils import get_or_create_tag, tag_processor
 
 
 ###
