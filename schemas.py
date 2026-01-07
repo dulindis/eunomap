@@ -4,6 +4,7 @@ from typing import List, Optional
 from sqlalchemy import Boolean, Column, Integer, String
 
 from db import Base
+from datetime import datetime
 
 
 # --- Input Schemas (What you send) ---

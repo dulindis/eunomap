@@ -1,5 +1,6 @@
 # # from utils import normalize, normalize_hierarchy
-# from utils.hierarchy_utils import normalize_hierarchy
+import json
+from utils.hierarchy_utils import normalize_hierarchy, compress_hierarchy
 
 # # test_strings = [
 # #     "COVID-19",  # hyphen should stay
@@ -84,5 +85,11 @@
 #     },
 #     "Others": [],
 # }
+file_path = "normed_hierarchy.json"
+with open(file_path, "r", encoding="utf-8") as f:
+    hierarchy = json.load(f)
 
-# normalize_hierarchy(test_hierarchy, 3)
+hierarchy = normalize_hierarchy(hierarchy, 5)
+
+with open("normed_hierarchy_normalized.json", "w", encoding="utf-8") as f:
+    json.dump(compress_hierarchy(hierarchy), f, indent=2)

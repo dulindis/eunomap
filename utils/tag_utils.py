@@ -2,10 +2,12 @@ import re
 import unicodedata
 
 from sqlalchemy.orm import Session
+import inflect
 
 from models import Tag, TagStats
-from tag_normalization_config import DO_NOT_SINGULARIZE, ALIASES
+from .tag_normalization_config import DO_NOT_SINGULARIZE, ALIASES
 
+_inflect = inflect.engine()
 
 # =============================================================================
 # Tag Normalization
@@ -19,6 +21,9 @@ class TagProcessor:
         self.aliases = aliases or ALIASES
         self.do_not_singularize = do_not_singularize or DO_NOT_SINGULARIZE
 
+    # ------------------------------------------------------------------
+    # Preprocessing (shared)
+    # ------------------------------------------------------------------
     def _preprocess(self, text: str) -> str:
         """Common preprocessing for both normalize and slugify."""
         if not text:
@@ -33,28 +38,36 @@ class TagProcessor:
 
         return text
 
+    # ------------------------------------------------------------------
+    # NORMALIZE (canonical tag key)
+    # ------------------------------------------------------------------
     def normalize(self, text: str) -> str:
         """
         Normalize a string into a stable tag key.
         Used for: tag lookups, comparisons, deduplication
         """
         text = self._preprocess(text)
+        return self.normalize_from_preprocessed(text)
 
-        # Keep special chars that are meaningful for tags
+        # # Keep special chars that are meaningful for tags
+        # # text = re.sub(r"[^a-z0-9\s_\-#\+&]", "", text)
         # text = re.sub(r"[^a-z0-9\s_\-#\+&]", "", text)
-        text = re.sub(r"[^a-z0-9\s_\-#\+&]", "", text)
 
-        # Collapse whitespace
-        text = re.sub(r"\s+", " ", text)
+        # # Collapse whitespace
+        # text = re.sub(r"\s+", " ", text)
 
-        # Spaces → underscores (tag convention)
-        text = text.replace(" ", "_")
+        # # Spaces → underscores (tag convention)
+        # text = text.replace(" ", "_")
 
-        # Normalize separators
-        text = re.sub(r"_+", "_", text)
-        text = text.strip("_")
+        # # Normalize separators
+        # text = re.sub(r"_+", "_", text)
 
-        return text
+        # # Remove double hyphens
+        # text = re.sub(r"-+", "-", text)
+
+        # text = text.strip("_")
+
+        # return text
 
     def slugify(self, text: str) -> str:
         """
@@ -62,22 +75,23 @@ class TagProcessor:
         Used for: filesystem paths, URLs
         """
         text = self._preprocess(text)
+        return self.slugify_from_preprocessed(text)
 
-        # Convert to ASCII only (paths need to be universally safe)
-        text = unicodedata.normalize("NFKD", text)
-        text = text.encode("ascii", "ignore").decode("ascii")
+        # # Convert to ASCII only (paths need to be universally safe)
+        # text = unicodedata.normalize("NFKD", text)
+        # text = text.encode("ascii", "ignore").decode("ascii")
 
-        # Replace spaces & underscores with hyphens (URL convention)
-        text = re.sub(r"[\s_]+", "-", text)
+        # # Replace spaces & underscores with hyphens (URL convention)
+        # text = re.sub(r"[\s_]+", "-", text)
 
-        # Remove anything not alphanumeric or hyphen
-        text = re.sub(r"[^a-z0-9\-]+", "", text)
+        # # Remove anything not alphanumeric or hyphen
+        # text = re.sub(r"[^a-z0-9\-]+", "", text)
 
-        # Collapse multiple hyphens
-        text = re.sub(r"-+", "-", text)
-        text = text.strip("-")
+        # # Collapse multiple hyphens
+        # text = re.sub(r"-+", "-", text)
+        # text = text.strip("-")
 
-        return text
+        # return text
 
     def get_canonical_form(self, text: str) -> tuple[str, str]:
         """
@@ -96,20 +110,40 @@ class TagProcessor:
         """Skip preprocessing if already done."""
         # Keep special chars that are meaningful for tags
         text = re.sub(r"[^a-z0-9\s_\-#\+&]", "", text)
+        # Collapse whitespace
         text = re.sub(r"\s+", " ", text)
+        # Spaces → underscores
         text = text.replace(" ", "_")
+
+        # Normalize separators
         text = re.sub(r"_+", "_", text)
+        text = re.sub(r"-+", "-", text)
+
         text = text.strip("_")
-        return text
+
+        # 🔑 Singularize last word (OLD BEHAVIOR PRESERVED)
+        parts = text.split("_")
+        last = parts[-1]
+        if last.isalpha() and last not in self.do_not_singularize:
+            singular = _inflect.singular_noun(last)
+            if singular:
+                parts[-1] = singular
+
+        return "_".join(parts)
 
     def slugify_from_preprocessed(self, text: str) -> str:
         """Skip preprocessing if already done."""
+        # Convert to ASCII
         text = unicodedata.normalize("NFKD", text)
         text = text.encode("ascii", "ignore").decode("ascii")
+        # Spaces & underscores → hyphens
         text = re.sub(r"[\s_]+", "-", text)
+        # Only alphanumerics and hyphens
         text = re.sub(r"[^a-z0-9\-]+", "", text)
+        # Normalize hyphens
         text = re.sub(r"-+", "-", text)
         text = text.strip("-")
+
         return text
 
 

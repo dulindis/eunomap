@@ -9,11 +9,10 @@ from fastapi.testclient import TestClient
 from main import app
 from db import get_db
 from tests.test_database import create_test_engine, create_session
-from utils import add_tags
 
 from utils.user_utils import add_users, SAMPLE_USERS
 from utils.hierarchy_utils import load_hierarchy
-from utils.tag_utils import add_tags, tag_processor
+from utils.tag_utils import add_tags, tag_processor, add_tags
 import pytest
 import whisper
 
@@ -121,7 +120,7 @@ def test_hierarchy_path():
     """Path to the test hierarchy JSON file."""
     # return "tests/test_hierarchy.json"
     # return "tests/hierarchy.json"
-    return "tests/normed_hierarchy.json"
+    return "tests/hierarchy.json"
 
 
 @pytest.fixture

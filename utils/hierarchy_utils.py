@@ -4,6 +4,10 @@ from sqlalchemy.orm import Session
 
 from utils.tag_utils import get_or_create_tag, tag_processor
 
+import inflect
+
+_inflect = inflect.engine()
+
 
 ###
 # Load hierarchy from file
@@ -13,53 +17,113 @@ def load_hierarchy(file_path: str = "hierarchy.json") -> dict:
 
 
 # Normalize hierarchy json
+def norm(s: str) -> str:
+    return tag_processor.normalize(s)
+
+
 def normalize_hierarchy(node, max_depth):
-    # print(f"node={node} max_depth={max_depth}")
+    # print(" " * (3 - max_depth), type(node), max_depth)
+    if max_depth < 0:
+        raise RuntimeError("Max depth exceeded")
 
-    if max_depth == 0:
-        raise RuntimeError("Max depth reached")
-
-    next_max_depth = max_depth - 1
-
-    def normalize_dict(node):
-        return {k: normalize_hierarchy(v, next_max_depth) for (k, v) in node.items()}
+    def normalize_dict(d):
+        return {norm(k): normalize_hierarchy(v, max_depth - 1) for k, v in d.items()}
 
     if isinstance(node, dict):
         return normalize_dict(node)
+
     elif isinstance(node, str):
-        return {node: {}}
+        return {norm(node): {}}
+
     elif isinstance(node, list):
-        n = len(node)
-        i = 0
         dst = {}
-        while i < n:
-            x = node[i]
-            if isinstance(x, str):
-                if i < n - 1 and (
-                    isinstance(node[i + 1], list) or isinstance(node[i + 1], dict)
-                ):
-                    dst[x] = normalize_hierarchy(node[i + 1], next_max_depth)
+        i = 0
+
+        while i < len(node):
+            key = node[i]
+
+            if isinstance(key, str):
+                if i + 1 < len(node) and isinstance(node[i + 1], (list, dict)):
+                    dst[key] = normalize_hierarchy(node[i + 1], max_depth - 1)
                     i += 2
                 else:
-                    dst[x] = {}
+                    dst[key] = {}
                     i += 1
-            elif isinstance(x, dict):
-                dst.update(normalize_dict(x))
+
+            elif isinstance(key, dict):
+                # keys normalized inside normalize_dict
+                dst.update(normalize_dict(key))
                 i += 1
             else:
                 raise RuntimeError("Syntax error B")
         return dst
+
     else:
         raise RuntimeError("Syntax error C")
 
 
+# def normalize_hierarchy(node, max_depth):
+#     # print(f"node={node} max_depth={max_depth}")
+
+#     if max_depth == 0:
+#         raise RuntimeError("Max depth reached")
+
+#     next_max_depth = max_depth - 1
+
+#     def normalize_dict(node):
+#         return {k: normalize_hierarchy(v, next_max_depth) for (k, v) in node.items()}
+
+#     if isinstance(node, dict):
+#         return normalize_dict(node)
+#     elif isinstance(node, str):
+#         return {node: {}}
+#     elif isinstance(node, list):
+#         n = len(node)
+#         i = 0
+#         dst = {}
+#         while i < n:
+#             x = node[i]
+#             if isinstance(x, str):
+#                 if i < n - 1 and (
+#                     isinstance(node[i + 1], list) or isinstance(node[i + 1], dict)
+#                 ):
+#                     dst[x] = normalize_hierarchy(node[i + 1], next_max_depth)
+#                     i += 2
+#                 else:
+#                     dst[x] = {}
+#                     i += 1
+#             elif isinstance(x, dict):
+#                 dst.update(normalize_dict(x))
+#                 i += 1
+#             else:
+#                 raise RuntimeError("Syntax error B")
+#         return dst
+#     else:
+#         raise RuntimeError("Syntax error C")
+
+
+# def compress_hierarchy(node):
+#     assert isinstance(node, dict)
+#     non_empty = [v for v in node.values() if len(v) != 0]
+#     if len(non_empty) == 0:
+#         return list(node.keys())
+#     else:
+#         return {k: compress_hierarchy(v) for (k, v) in node.items()}
 def compress_hierarchy(node):
-    assert isinstance(node, dict)
-    non_empty = [v for v in node.values() if len(v) != 0]
-    if len(non_empty) == 0:
-        return list(node.keys())
+    if isinstance(node, dict):
+        return {
+            k: compress_hierarchy(v) for k, v in node.items() if v not in ({}, None)
+        }
+
+    # tolerate leaf values
+    elif isinstance(node, list):
+        return {}
+
+    elif isinstance(node, str):
+        return {}
+
     else:
-        return {k: compress_hierarchy(v) for (k, v) in node.items()}
+        raise TypeError(f"Unexpected node type: {type(node)}")
 
 
 ### STREAMLIT HIERARCHY UTILS
@@ -149,8 +213,6 @@ def build_flat_mapping(node) -> dict[str, list]:
                 mapping[key_lower] = v
 
     return mapping
-
-
 
 
 # =============================================================================

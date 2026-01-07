@@ -14,13 +14,13 @@
   "bodily_fluid": {},
   "pet": {},
   "fitness": {
-    "Sport": {}
+    "sport": {}
   },
   "fashion": {},
   "cosmetics": {
-    "Skincare": {},
-    "Haircare": {},
-    "Products": {}
+    "skincare": {},
+    "haircare": {},
+    "product": {}
   },
   "household": {
     "washing": {},
@@ -114,50 +114,50 @@
     "quotes": {}
   },
   "media": {
-    "Book": {}
+    "book": {}
   },
   "food": {
     "cooking": {},
     "recipe": {},
     "ingredient": {
-      "Fruit": {},
-      "Spices": {}
+      "fruit": {},
+      "spice": {}
     },
     "dining": {},
     "alcohol": {}
   },
   "technology": {
     "it": {
-      "Equipment": {},
-      "Cloud Computing": {},
-      "Database": {}
+      "equipment": {},
+      "cloud_computing": {},
+      "database": {}
     },
     "software_development": {},
     "programming_language": {},
     "trend": {},
     "ai_ml": {
-      "models": {},
-      "ai tools": {},
+      "model": {},
+      "ai_tool": {},
       "automation": {}
     }
   },
   "finance": {
-    "Shopping": {},
-    "business": {},
+    "shopping": {},
+    "busines": {},
     "company": {}
   },
   "education": {
-    "Learning": {}
+    "learning": {}
   },
   "career": {
-    "Networking": {},
-    "People": {}
+    "networking": {},
+    "person": {}
   },
   "person": {
     "contact": {}
   },
   "cybersecurity": {
-    "Network Security": {}
+    "network_security": {}
   },
   "kids": {},
   "idea": {},
