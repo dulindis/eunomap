@@ -144,6 +144,7 @@
       "Skin Conditions",
       "epilepsy"
     ],
+    "First aid": [],
     "Health services": [
       "emergency",
       "Rehabitation",
@@ -171,7 +172,8 @@
     "Animal Nutrition",
     "Training",
     "Veterinarian",
-    "Health"
+    "Health",
+    "name ideas"
   ],
   "Fitness": [
     "Workout",
@@ -191,7 +193,6 @@
     "Style",
     "Inspiration",
     "Trends",
-    "Inspiration",
     "Sustainable Fashion",
     "Vintage Style"
   ],
@@ -244,7 +245,9 @@
       "Solo Travel",
       "Visa",
       "Phone & Connectivity",
-      "customs"
+      "customs",
+      "accomodation",
+      "websites"
     ],
     "Places": {
       "Poland": ["Food", "Shops", "Monuments", "Museums"],
@@ -569,7 +572,8 @@
         "foundries",
         "pricing",
         "workshops",
-        "commissions"
+        "commissions",
+        "jewellers"
       ],
       "History & Culture": [
         "traditional techniques",
@@ -581,7 +585,8 @@
         "tutorials",
         "troubleshooting",
         "beginner tips",
-        "advanced techniques"
+        "advanced techniques",
+        "books"
       ]
     },
     "Gardening": ["bonsai", "plants", "landscaping"],
@@ -590,10 +595,13 @@
     "Poetry": ["modern", "classical", "haiku"],
     "Knitting": ["stitch", "patterns", "yarn"],
     "Sculpting": ["stone", "clay", "metal", "wood"],
+    "glasswork": [],
+    "Ceramics": ["glazing"],
     "Design": ["retro", "modern", "graphic", "interior"],
     "Artists": ["beksinski", "goya", "church", "bierstadt", "dali"],
     "Theater": ["performance", "stagecraft", "playwriting"],
-    "Quotes": ["artist_quotes", "inspiration"]
+    "inspiration": ["Quotes", "interesting words"],
+    "Sewing": ["textile", "pattern"]
   },
   "Media": [
     "Movie",
@@ -684,7 +692,9 @@
       "Cybersecurity",
       "Database",
       ["SQL", "NoSQL", "PostgreSQL", "MongoDB", "SQLite"],
-      "QA"
+      "QA",
+      "tokens",
+      "auth"
     ],
     "Software Development": [
       "Programming Basics",
@@ -741,12 +751,15 @@
   },
   "Finance": [
     "Investing",
+    ["ike", "ikze", "oipe", "ppk"],
     "Saving",
     "Budgeting",
     "Cryptocurrency",
     "Real Estate",
-    "echange",
+    "retirement",
+    "exchange",
     "Personal Finance",
+    ["budgeting", "red file"],
     "Shopping",
     ["discount code"],
     "ETF",
@@ -758,7 +771,8 @@
     "business",
     ["business advice", "startup", "name idea"],
     "company",
-    ["remote", "hybrid", "on site"]
+    ["remote", "hybrid", "on site"],
+    "bank"
   ],
   "Education": [
     "Learning",
@@ -777,7 +791,7 @@
     "Resume Building",
     "Interview Tips",
     "Networking",
-    ["people", "meetups"],
+    ["people", "meetups", "dating"],
 
     "Professional Development",
     "Workplace Skills",
@@ -802,7 +816,8 @@
     "Programs",
     "Phishing",
     "Online Safety",
-    "Dark Web"
+    "Dark Web",
+    "auth"
   ],
   "Kids": [
     "Parenting",
@@ -813,7 +828,8 @@
     "Development",
     "Games",
     "Crafts",
-    "Storytelling"
+    "Storytelling",
+    "name ideas"
   ],
   "Ideas": [
     "Startup Ideas",
@@ -844,15 +860,21 @@
     "Networking Events",
     "Exhibitions",
     "Festivals",
-    "Webinars"
+    "Webinars",
+    "christmas",
+    ["christmas bulbs", "christmas tree"],
+    "easter",
+    ["egg decoration"]
   ],
   "Humor": ["jokes", "memes", "funny images"],
   "Life": [
     "Taxes",
     "Insurance",
     "agency",
-    ["zus", "msz", "customs", "post", "urzad skarbowy", "urzad pracy"]
+    ["zus", "msz", "customs", "post", "urzad skarbowy", "urzad pracy"],
+    "planning"
   ],
-  "Transportation": ["car", "ferry", "bus"],
-  "Others": ["Lifestyle", "Hobbies"]
+  "Transportation": ["car", ["tires"], "ferry", "bus", "airpolanes"],
+
+  "Others": ["Lifestyle", "Hobbies", "Diary", "Dreams", "insigtful"]
 }
