@@ -29,13 +29,21 @@
       "Neurologist",
       "Dermatologist",
       "Psychiatrist",
+      "Psychologist",
       "Pediatrician",
       "Endocrinologist",
       "Surgeon",
       "Dentist",
       "Ophthalmologist",
       "Gynecologist",
-      "Physiotherapist"
+      "Physiotherapist",
+      "Allergologist",
+      "Dentist",
+      "Rheumatologist",
+      "Oncologist",
+      "urologist",
+      "Orthopedist",
+      "Immunologist"
     ],
     "Medication": [
       "Drug",
@@ -44,7 +52,8 @@
       "Herbs",
       "Painkillers",
       "Vaccines",
-      "Antibiotics"
+      "Antibiotics",
+      "Essential Oils"
     ],
     "Nutrition": [
       "Dieting",
@@ -59,7 +68,9 @@
       "Sleep",
       "Self-care",
       "Balance",
-      "Detox"
+      "Detox",
+      "Relax",
+      "Essential Oils"
     ],
     "Therapy": ["Physical Therapy", "Psychotherapy"],
     "Mental Health": [
@@ -69,7 +80,8 @@
       "Stress",
       "Burnout",
       "Sleep Disorders",
-      "Mindfulness"
+      "Mindfulness",
+      "Psychologist"
     ],
     "Body": [
       "Head",
@@ -116,7 +128,6 @@
       "Cancer",
       "Arthritis",
       "Depression",
-      "Anxiety",
       "Obesity",
       "COVID-19",
       "Influenza",
@@ -130,7 +141,14 @@
       "Osteoporosis",
       "Autoimmune Disorders",
       "Allergies",
-      "Skin Conditions"
+      "Skin Conditions",
+      "epilepsy"
+    ],
+    "Health services": [
+      "emergency",
+      "Rehabitation",
+      "Diagnostics",
+      "Telemedicine"
     ]
   },
   "Bodily Fluids": [
@@ -157,23 +175,19 @@
   ],
   "Fitness": [
     "Workout",
-    "Exercise",
     "Yoga",
     "Meditation",
     "Mindfulness",
     "Diet",
-    "Hiking",
     "Outdoors",
-    "Kayaking",
-    "Running",
-    "Stretching",
-    "Home Workouts"
+    "Home Workouts",
+    "Sport",
+    ["Kayaking", "Hiking", "Running", "Stretching", "swimming"]
   ],
   "Fashion": [
     "Clothes Brands",
     "Shoes",
     "Accessories",
-    "Fashion",
     "Style",
     "Inspiration",
     "Trends",
@@ -186,7 +200,7 @@
     "Skincare",
     ["Soap"],
     "Haircare",
-    ["Conditioner", "Shampoo"],
+    ["Conditioner", "Shampoo", "Dye"],
     "Fragrance",
     "Beauty Tips",
     "Products",
@@ -215,7 +229,8 @@
       "Interior Design",
       "Home Safety",
       "Furniture"
-    ]
+    ],
+    "Gardening": ["Bonsai", "Landscaping", "Indoor Plants", "seedling"]
   },
   "Travel": {
     "General": [
@@ -231,7 +246,7 @@
       "Phone & Connectivity"
     ],
     "Places": {
-      "Poland": [],
+      "Poland": ["Food", "Shops", "Monuments", "Museums"],
       "Europe": [
         "Germany",
         "France",
@@ -248,7 +263,8 @@
         "Slovenia",
         "Greece",
         "United Kingdom",
-        "Ireland"
+        "Ireland",
+        "Cyprus"
       ],
       "Asia": [
         "Japan",
@@ -304,7 +320,8 @@
       "Lakes",
       "Waterfalls",
       "Hot Springs",
-      "Fjords"
+      "Fjords",
+      "Museums"
     ],
     "Themes": [
       "Adventure",
@@ -323,7 +340,8 @@
       "Drinks",
       "Cafes",
       "Markets",
-      "Wine Regions"
+      "Wine",
+      "Beer"
     ],
     "Hikes": [
       "Routes",
@@ -345,42 +363,174 @@
     ]
   },
   "Art": {
-    "Drawing": ["Graphite", "Pencil", "Digital"],
-    "Painting": ["Oil", "Watercolor", "Acrylic"],
-    "Music": [
-      "Movie Music",
-      "Rock",
-      "Metal",
-      "Folk",
-      "Nordic",
-      "Classical",
-      "Jazz"
+    "Drawing": {
+      "Materials": ["graphite", "pencil", "charcoal", "ink"],
+      "Techniques": ["sketching", "rendering", "proportion"]
+    },
+    "Painting": {
+      "Medium": ["oil", "acrylic", "watercolor", "gouache"],
+      "Techniques": [
+        "alla_prima",
+        "glazing",
+        "impasto",
+        "wet_on_wet",
+        "scumbling",
+        "underpainting",
+        "blocking_in",
+        "plein_air"
+      ],
+      "Subjects": [
+        "portrait",
+        "landscape",
+        "still_life",
+        "figure",
+        "abstract",
+        "seascape",
+        "wildlife"
+      ],
+      "Color_Theory": [
+        "color_mixing",
+        "complementary_colors",
+        "value",
+        "temperature",
+        "saturation",
+        "color_harmony"
+      ],
+      "Brushwork": [
+        "brush_types",
+        "brush_techniques",
+        "mark_making",
+        "edge_control",
+        "texture"
+      ]
+    },
+    "Materials_and_Supplies": {
+      "Paint": {
+        "Brands": [
+          "williamsburg",
+          "gamblin",
+          "old_holland",
+          "winsor_newton",
+          "michael_harding"
+        ],
+        "Colors": [
+          "titanium_white",
+          "cadmium_yellow",
+          "ultramarine_blue",
+          "burnt_umber",
+          "burnt_sienna",
+          "alizarin_crimson",
+          "viridian_green",
+          "yellow_ochre",
+          "raw_umber",
+          "ivory_black"
+        ],
+        "Pigments": ["single_pigment", "transparent", "opaque", "lightfast"]
+      },
+      "Brushes": {
+        "Types": ["flat", "filbert", "round", "fan", "dagger", "rigger"],
+        "Bristles": ["hog_bristle", "synthetic", "sable"],
+        "Brands": ["rosemary_and_co"]
+      },
+      "Surfaces": [
+        "canvas",
+        "linen",
+        "panel",
+        "paper",
+        "primed",
+        "oil_primed",
+        "acrylic_primed",
+        "belgian_linen"
+      ],
+      "Mediums": [
+        "linseed_oil",
+        "stand_oil",
+        "liquin",
+        "turpentine",
+        "gamsol",
+        "impasto_medium",
+        "glazing_medium"
+      ],
+      "Tools": [
+        "palette_knife",
+        "easel",
+        "palette",
+        "color_checker",
+        "mirror",
+        "proportional_divider"
+      ]
+    },
+    "Techniques_and_Methods": {
+      "Fundamentals": [
+        "composition",
+        "value_study",
+        "perspective",
+        "anatomy",
+        "light_and_shadow",
+        "edges"
+      ],
+      "Oil_Painting_Rules": [
+        "fat_over_lean",
+        "thick_over_thin",
+        "slow_over_fast"
+      ],
+      "Application": [
+        "layering",
+        "blending",
+        "dry_brush",
+        "stippling",
+        "sgraffito"
+      ]
+    },
+    "Studio_Setup": [
+      "lighting",
+      "easel",
+      "storage",
+      "ventilation",
+      "workspace_organization"
     ],
-    "Goldsmithing": ["Jewellery", "Technique", "Metals"],
-    "Gardening": ["Bonsai", "Landscaping", "Indoor Plants"],
-    "Crafts": ["DIY", "Paper Art", "Embroidery"],
-    "Photography": [
-      "Portrait",
-      "Landscape",
-      "Film",
-      "Editing",
-      "Lighting",
-      "Equipment"
+    "Finishing": [
+      "varnishing",
+      "retouch_varnish",
+      "final_varnish",
+      "framing",
+      "photography"
     ],
-    "Poetry": ["Haiku", "Rhymes", "Themes", "Modern Poetry", "Quotes"],
-    "Knitting": ["Stitch", "Patterns"],
-    "Sculpting": ["Stone", "Clay", "Wood"],
-    "Design": ["retro", "typography"],
-    "Artist": [
-      "Beksinski",
-      "van Gogh",
-      "Monet",
-      "Picasso",
-      "Bierstadt",
-      "church"
-    ],
-    "Theater": ["musicals", "plays"],
-    "Quotes": []
+    "Professional_Practice": {
+      "Business": [
+        "pricing",
+        "exhibitions",
+        "galleries",
+        "commissions",
+        "art_fairs"
+      ],
+      "Marketing": [
+        "portfolio",
+        "website",
+        "social_media",
+        ["facebook", "linkedin", "instagram"],
+        "artist_statement",
+        "photography"
+      ],
+      "Shipping": ["packing", "international_shipping", "insurance"]
+    },
+    "Learning_Resources": {
+      "Books": ["art_instruction", "artist_biography", "color_theory"],
+      "Videos": ["tutorials", "demonstrations"],
+      "Courses": ["online", "workshops", "masterclass"]
+    },
+    "Music": ["movie_music", "classical", "composition"],
+    "Goldsmithing": ["jewellery", "technique", "metalwork"],
+    "Gardening": ["bonsai", "plants", "landscaping"],
+    "Crafts": ["DIY", "handmade", "mixed_media"],
+    "Photography": ["landscape", "portrait", "studio", "editing", "cyanotype"],
+    "Poetry": ["modern", "classical", "haiku"],
+    "Knitting": ["stitch", "patterns", "yarn"],
+    "Sculpting": ["stone", "clay", "metal", "wood"],
+    "Design": ["retro", "modern", "graphic", "interior"],
+    "Artists": ["beksinski", "goya", "church", "bierstadt", "dali"],
+    "Theater": ["performance", "stagecraft", "playwriting"],
+    "Quotes": ["artist_quotes", "inspiration"]
   },
   "Media": [
     "Movie",
@@ -391,7 +541,6 @@
     "Music",
     "Streaming Services",
     "Newspaper",
-    "Music",
     "Publishing",
     "Author",
     "Blog",
@@ -424,26 +573,28 @@
       "Meat",
       "Seafood",
       "Spices",
+      ["Cinnamon"],
       "Herbs",
       "Nuts",
-      "Grains"
+      "Grains",
+      "Honey"
     ],
     "Dining": [
       "Restaurants",
       "Cafe",
       "Street Food",
       "Fine Dining",
-      "Food Trucks"
-    ]
+      "Food Trucks",
+      "vineyard",
+      "brewery"
+    ],
+    "Alcohol": ["Wine", "Beer", "Liqueur", "Mead"]
   },
   "Technology": {
-    "General": [
-      "Technology",
+    "IT": [
       "Gadgets",
       "Web Development",
       "Mobile Apps",
-      "AI/ML",
-      ["RAG", "agentic", "genAI"],
       "Software Programs",
       "Equipment",
       ["phone", "laptop", "pc"],
@@ -451,7 +602,13 @@
       "3D Printing",
       "Electronics",
       "Innovation",
-      "website"
+      "website",
+      "Cloud Computing",
+      ["AWS", "Azure", "Google Cloud", "Docker", "Kubernetes"],
+      "Cybersecurity",
+      "Database",
+      ["SQL", "NoSQL", "PostgreSQL", "MongoDB", "SQLite"],
+      "QA"
     ],
     "Software Development": [
       "Programming Basics",
@@ -472,7 +629,24 @@
       "Rust",
       "TypeScript"
     ],
-    "Trends": ["Blockchain", "IoT", "Cloud Computing", "Automation", "Agentic"]
+    "Trends": ["Blockchain", "IoT", "Cloud Computing", "Automation", "Agentic"],
+    "AI/ML": [
+      "RAG",
+      "agentic",
+      "genAI",
+      "prompts",
+      "models",
+      [
+        "gemini",
+        "perplexity",
+        "claude",
+        "sonnet",
+        "grok",
+        "chatgpt",
+        "deepseek",
+        "copilot"
+      ]
+    ]
   },
   "Finance": [
     "Investing",
@@ -491,7 +665,9 @@
     "Financial Literacy",
     "Wealth Management",
     "business",
-    ["business advice", "startup", "name idea"]
+    ["business advice", "startup", "name idea"],
+    "company",
+    ["remote", "hybrid", "on site"]
   ],
   "Education": [
     "Learning",
@@ -510,14 +686,19 @@
     "Interview Tips",
     "Networking",
     ["people", "meetups"],
+
     "Professional Development",
     "Workplace Skills",
     "People",
     ["quotes"],
     "Career Change"
   ],
+  "people": [
+    "contact",
+    ["social_media", "whatsapp", "phone", "signal"],
+    "address"
+  ],
   "Cybersecurity": [
-    "Cybersecurity",
     "Hacking",
     "Data Protection",
     "Privacy",
@@ -560,7 +741,8 @@
     "Gift Ideas",
     "Discount Codes",
     "Reviews",
-    "Sustainable Products"
+    "Sustainable Products",
+    "To buy"
   ],
   "Trivia": ["Fun Facts", "History Facts", "Science Facts", "Cultural Facts"],
   "Events": [
@@ -573,5 +755,7 @@
     "Webinars"
   ],
   "Humor": ["jokes", "memes", "funny images"],
+  "Life": ["Taxes", "Insurance"],
+  "Transportation": ["car", "ferry", "bus"],
   "Others": ["Lifestyle", "Hobbies"]
 }
