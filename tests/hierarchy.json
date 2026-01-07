@@ -226,22 +226,85 @@
       "Festivals",
       "Travel Safety",
       "Budget Travel",
-      "Solo Travel"
+      "Solo Travel",
+      "Visa",
+      "Phone & Connectivity"
     ],
-    "Places": [
-      "Poland",
-      "Europe",
-      "Asia",
-      "South America",
-      "North America",
-      "Africa",
-      "Australia",
-      "Antarctica",
-      "Greenland",
-      "Monuments",
-      "National Parks",
+    "Places": {
+      "Poland": [],
+      "Europe": [
+        "Germany",
+        "France",
+        "Italy",
+        "Spain",
+        "Portugal",
+        "Switzerland",
+        "Austria",
+        "Norway",
+        "Sweden",
+        "Finland",
+        "Iceland",
+        "Croatia",
+        "Slovenia",
+        "Greece",
+        "United Kingdom",
+        "Ireland"
+      ],
+      "Asia": [
+        "Japan",
+        "China",
+        "South Korea",
+        "Thailand",
+        "Vietnam",
+        "Indonesia",
+        "Philippines",
+        "India",
+        "Sri Lanka",
+        "Nepal",
+        "Georgia",
+        "Turkey"
+      ],
+      "Africa": [
+        "Egypt",
+        "Morocco",
+        "Tunisia",
+        "Ethiopia",
+        "Kenya",
+        "Tanzania",
+        "Namibia",
+        "South Africa",
+        "Botswana",
+        "Zanzibar"
+      ],
+      "North America": ["United States", "Canada", "Mexico"],
+      "South America": [
+        "Peru",
+        "Chile",
+        "Argentina",
+        "Bolivia",
+        "Colombia",
+        "Brazil"
+      ],
+      "Oceania": ["Australia", "New Zealand"],
+
+      "Polar Regions": ["Greenland", "Antarctica", "Svalbard"]
+    },
+    "Place Types": [
       "Cities",
-      "Islands"
+      "Towns & Villages",
+      "Monuments",
+      "Castles & Ruins",
+      "National Parks",
+      "Nature Reserves",
+      "Islands",
+      "Beaches",
+      "Mountains",
+      "Volcanoes",
+      "Deserts",
+      "Lakes",
+      "Waterfalls",
+      "Hot Springs",
+      "Fjords"
     ],
     "Themes": [
       "Adventure",
@@ -249,9 +312,37 @@
       "History",
       "Nature",
       "Luxury",
-      "Road Trips"
+      "Road Trips",
+      "City Break",
+      "Slow Travel",
+      "Remote & Wild"
     ],
-    "Food": ["Street Food", "Local Dishes", "Drinks"]
+    "Food": [
+      "Street Food",
+      "Local Dishes",
+      "Drinks",
+      "Cafes",
+      "Markets",
+      "Wine Regions"
+    ],
+    "Hikes": [
+      "Routes",
+      "Trails",
+      "Refuges",
+      "Huts",
+      "Viewpoints",
+      "Summits",
+      "Coordinates",
+      "Camping",
+      "Wild Camping"
+    ],
+    "Weather & Nature": [
+      "Weather Tracking",
+      "Aurora",
+      "Volcano Activity",
+      "Best Season",
+      "Climate Risks"
+    ]
   },
   "Art": {
     "Drawing": ["Graphite", "Pencil", "Digital"],
@@ -355,6 +446,7 @@
       ["RAG", "agentic", "genAI"],
       "Software Programs",
       "Equipment",
+      ["phone", "laptop", "pc"],
       "Design",
       "3D Printing",
       "Electronics",
@@ -388,6 +480,7 @@
     "Budgeting",
     "Cryptocurrency",
     "Real Estate",
+    "echange",
     "Personal Finance",
     "Shopping",
     ["discount code"],
