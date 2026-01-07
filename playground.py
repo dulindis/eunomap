@@ -85,7 +85,7 @@ from utils.hierarchy_utils import normalize_hierarchy, compress_hierarchy
 #     },
 #     "Others": [],
 # }
-file_path = "normed_hierarchy.json"
+file_path = "hierarchy.json"
 with open(file_path, "r", encoding="utf-8") as f:
     hierarchy = json.load(f)
 

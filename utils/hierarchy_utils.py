@@ -101,7 +101,7 @@ def normalize_hierarchy(node, max_depth):
 #     else:
 #         raise RuntimeError("Syntax error C")
 
-
+# version jonaszek
 # def compress_hierarchy(node):
 #     assert isinstance(node, dict)
 #     non_empty = [v for v in node.values() if len(v) != 0]
@@ -109,13 +109,33 @@ def normalize_hierarchy(node, max_depth):
 #         return list(node.keys())
 #     else:
 #         return {k: compress_hierarchy(v) for (k, v) in node.items()}
+# def compress_hierarchy(node):
+#     if isinstance(node, dict):
+#         return {
+#             k: compress_hierarchy(v) for k, v in node.items() if v not in ({}, None)
+#         }
+
+#     # tolerate leaf values
+#     elif isinstance(node, list):
+#         return {}
+
+#     elif isinstance(node, str):
+#         return {}
+
+#     else:
+#         raise TypeError(f"Unexpected node type: {type(node)}")
+
+
 def compress_hierarchy(node):
     if isinstance(node, dict):
-        return {
-            k: compress_hierarchy(v) for k, v in node.items() if v not in ({}, None)
-        }
+        result = {}
+        for k, v in node.items():
+            compressed = compress_hierarchy(v)
+            # Only exclude None values, keep all dicts (even empty ones)
+            if compressed is not None:
+                result[k] = compressed
+        return result
 
-    # tolerate leaf values
     elif isinstance(node, list):
         return {}
 

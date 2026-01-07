@@ -640,7 +640,17 @@
       ["Cinnamon"],
       "Herbs",
       "Nuts",
+      [
+        "walnuts",
+        "cashew",
+        "almonds",
+        "pine",
+        "sunflower",
+        "hazelnut",
+        "brazillian nuts"
+      ],
       "Grains",
+      ["buckwheat", "wheat", "rye"],
       "Honey",
       "Coffee",
       "tea"

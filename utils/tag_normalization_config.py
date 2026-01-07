@@ -265,4 +265,5 @@ ALIASES = {
     "pet care": "pet_care",
     "scent": "fragrance",
     "taxes": "tax",
+    "paint": "color",
 }

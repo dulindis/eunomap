@@ -1,173 +1,1062 @@
 {
-  "language": {},
+  "language": {
+    "Spanish": {},
+    "Portuguese": {},
+    "French": {},
+    "German": {},
+    "Italian": {},
+    "Chinese": {},
+    "Swedish": {},
+    "English": {},
+    "Japanese": {},
+    "Korean": {},
+    "Arabic": {},
+    "Polish": {},
+    "Norwegian": {},
+    "Finnish": {},
+    "Czech": {},
+    "ciekawostki jezykowe": {},
+    "Etymology": {},
+    "Linguistics": {},
+    "Pronunciation": {},
+    "Slang": {},
+    "Translation": {},
+    "Language Learning Tips": {}
+  },
   "health": {
-    "doctor": {},
-    "medication": {},
-    "nutrition": {},
-    "wellness": {},
-    "therapy": {},
-    "mental_health": {},
-    "body": {},
-    "disease": {},
-    "health_services": {}
+    "doctor": {
+      "Cardiologist": {},
+      "Neurologist": {},
+      "Dermatologist": {},
+      "Psychiatrist": {},
+      "Psychologist": {},
+      "Pediatrician": {},
+      "Endocrinologist": {},
+      "Surgeon": {},
+      "Dentist": {},
+      "Ophthalmologist": {},
+      "Gynecologist": {},
+      "Physiotherapist": {},
+      "Allergologist": {},
+      "Rheumatologist": {},
+      "Oncologist": {},
+      "urologist": {},
+      "Orthopedist": {},
+      "Immunologist": {}
+    },
+    "medication": {
+      "Drug": {},
+      "Supplement": {},
+      "Natural Remedy": {},
+      "Herbs": {},
+      "Painkillers": {},
+      "Vaccines": {},
+      "Antibiotics": {},
+      "Essential Oils": {}
+    },
+    "nutrition": {
+      "Dieting": {},
+      "Healthy Eating": {},
+      "Superfood": {},
+      "Intermittent Fasting": {},
+      "Hydration": {}
+    },
+    "wellness": {
+      "Longevity": {},
+      "Wellbeing": {},
+      "Sleep": {},
+      "Self-care": {},
+      "Balance": {},
+      "Detox": {},
+      "Relax": {},
+      "Essential Oils": {}
+    },
+    "therapy": {
+      "Physical Therapy": {},
+      "Psychotherapy": {}
+    },
+    "mental_health": {
+      "Anxiety": {},
+      "Depression": {},
+      "ADHD": {},
+      "Stress": {},
+      "Burnout": {},
+      "Sleep Disorders": {},
+      "Mindfulness": {},
+      "Psychologist": {}
+    },
+    "body": {
+      "Head": {},
+      "Brain": {},
+      "Eyes": {},
+      "Ears": {},
+      "Nose": {},
+      "Mouth": {},
+      "Gums": {},
+      "Teeth": {},
+      "Neck": {},
+      "Chest": {},
+      "Heart": {},
+      "Lungs": {},
+      "Abdomen": {},
+      "Belly": {},
+      "Stomach": {},
+      "Liver": {},
+      "Kidneys": {},
+      "Intestines": {},
+      "Back": {},
+      "Spine": {},
+      "Shoulders": {},
+      "Arms": {},
+      "Elbows": {},
+      "Hands": {},
+      "Fingers": {},
+      "Hips": {},
+      "Legs": {},
+      "Knees": {},
+      "Ankles": {},
+      "Feet": {},
+      "Skin": {},
+      "Hormones": {},
+      "Joints": {},
+      "Muscles": {}
+    },
+    "disease": {
+      "Diabetes": {},
+      "Hypertension": {},
+      "Heart Disease": {},
+      "Stroke": {},
+      "Asthma": {},
+      "Cancer": {},
+      "Arthritis": {},
+      "Depression": {},
+      "Obesity": {},
+      "COVID-19": {},
+      "Influenza": {},
+      "Tuberculosis": {},
+      "Migraine": {},
+      "Alzheimer\u2019s Disease": {},
+      "Parkinson\u2019s Disease": {},
+      "Chronic Kidney Disease": {},
+      "Liver Disease": {},
+      "HIV/AIDS": {},
+      "Osteoporosis": {},
+      "Autoimmune Disorders": {},
+      "Allergies": {},
+      "Skin Conditions": {},
+      "epilepsy": {}
+    },
+    "health_services": {
+      "emergency": {},
+      "Rehabitation": {},
+      "Diagnostics": {},
+      "Telemedicine": {}
+    }
   },
-  "bodily_fluid": {},
-  "pet": {},
+  "bodily_fluid": {
+    "Blood": {},
+    "Pee": {},
+    "Vomit": {},
+    "Poo": {},
+    "Sweat": {},
+    "Saliva": {},
+    "Tears": {},
+    "Mucus": {}
+  },
+  "pet": {
+    "Dogs": {},
+    "Cats": {},
+    "Wildlife": {},
+    "Animal Health": {},
+    "Pet Care": {},
+    "Animal Nutrition": {},
+    "Training": {},
+    "Veterinarian": {},
+    "Health": {}
+  },
   "fitness": {
-    "sport": {}
+    "Workout": {},
+    "Yoga": {},
+    "Meditation": {},
+    "Mindfulness": {},
+    "Diet": {},
+    "Outdoors": {},
+    "Home Workouts": {},
+    "Sport": {
+      "Kayaking": {},
+      "Hiking": {},
+      "Running": {},
+      "Stretching": {},
+      "swimming": {}
+    }
   },
-  "fashion": {},
+  "fashion": {
+    "Clothes Brands": {},
+    "Shoes": {},
+    "Accessories": {},
+    "Style": {},
+    "Inspiration": {},
+    "Trends": {},
+    "Sustainable Fashion": {},
+    "Vintage Style": {}
+  },
   "cosmetics": {
-    "skincare": {},
-    "haircare": {},
-    "product": {}
+    "Makeup": {},
+    "Skincare": {
+      "Soap": {}
+    },
+    "Haircare": {
+      "Conditioner": {},
+      "Shampoo": {},
+      "Dye": {}
+    },
+    "Fragrance": {},
+    "Beauty Tips": {},
+    "Products": {
+      "Tested": {},
+      "To Test": {},
+      "moisturizing": {},
+      "emolient": {},
+      "protein": {},
+      "Anti-aging": {},
+      "Sun Protection": {}
+    }
   },
   "household": {
-    "washing": {},
-    "cleaning": {},
-    "home_improvement": {},
-    "gardening": {}
+    "washing": {
+      "Detergent": {},
+      "Laundry Care": {},
+      "Fabric Softener": {}
+    },
+    "cleaning": {
+      "Eco-friendly Cleaners": {},
+      "Decluttering": {},
+      "Home Maintenance": {},
+      "Disinfection": {},
+      "Odor Control": {}
+    },
+    "home_improvement": {
+      "DIY Projects": {},
+      "Repairs": {},
+      "Interior Design": {},
+      "Home Safety": {},
+      "Furniture": {}
+    },
+    "gardening": {
+      "Bonsai": {},
+      "Landscaping": {},
+      "Indoor Plants": {},
+      "seedling": {}
+    }
   },
   "travel": {
-    "general": {},
-    "place": {
-      "poland": {},
-      "europe": {},
-      "asia": {},
-      "africa": {},
-      "north_america": {},
-      "south_america": {},
-      "oceania": {},
-      "polar_region": {}
+    "general": {
+      "Tips": {},
+      "Itineraries": {},
+      "Where to Eat": {},
+      "Events": {},
+      "Festivals": {},
+      "Travel Safety": {},
+      "Budget Travel": {},
+      "Solo Travel": {},
+      "Visa": {},
+      "Phone & Connectivity": {},
+      "customs": {}
     },
-    "place_type": {},
-    "theme": {},
-    "food": {},
-    "hike": {},
-    "weather_&_nature": {}
+    "place": {
+      "poland": {
+        "Food": {},
+        "Shops": {},
+        "Monuments": {},
+        "Museums": {}
+      },
+      "europe": {
+        "Germany": {},
+        "France": {},
+        "Italy": {},
+        "Spain": {},
+        "Portugal": {},
+        "Switzerland": {},
+        "Austria": {},
+        "Norway": {},
+        "Sweden": {},
+        "Finland": {},
+        "Iceland": {},
+        "Croatia": {},
+        "Slovenia": {},
+        "Greece": {},
+        "United Kingdom": {},
+        "Ireland": {},
+        "Cyprus": {}
+      },
+      "asia": {
+        "Japan": {},
+        "China": {},
+        "South Korea": {},
+        "Thailand": {},
+        "Vietnam": {},
+        "Indonesia": {},
+        "Philippines": {},
+        "India": {},
+        "Sri Lanka": {},
+        "Nepal": {},
+        "Georgia": {},
+        "Turkey": {}
+      },
+      "africa": {
+        "Egypt": {},
+        "Morocco": {},
+        "Tunisia": {},
+        "Ethiopia": {},
+        "Kenya": {},
+        "Tanzania": {},
+        "Namibia": {},
+        "South Africa": {},
+        "Botswana": {},
+        "Zanzibar": {}
+      },
+      "north_america": {
+        "United States": {},
+        "Canada": {},
+        "Mexico": {}
+      },
+      "south_america": {
+        "Peru": {},
+        "Chile": {},
+        "Argentina": {},
+        "Bolivia": {},
+        "Colombia": {},
+        "Brazil": {}
+      },
+      "oceania": {
+        "Australia": {},
+        "New Zealand": {}
+      },
+      "polar_region": {
+        "Greenland": {},
+        "Antarctica": {},
+        "Svalbard": {}
+      }
+    },
+    "place_type": {
+      "Cities": {},
+      "Towns & Villages": {},
+      "Monuments": {},
+      "Castles & Ruins": {},
+      "National Parks": {},
+      "Nature Reserves": {},
+      "Islands": {},
+      "Beaches": {},
+      "Mountains": {},
+      "Volcanoes": {},
+      "Deserts": {},
+      "Lakes": {},
+      "Waterfalls": {},
+      "Hot Springs": {},
+      "Fjords": {},
+      "Museums": {}
+    },
+    "theme": {
+      "Adventure": {},
+      "Culture": {},
+      "History": {},
+      "Nature": {},
+      "Luxury": {},
+      "Road Trips": {},
+      "City Break": {},
+      "Slow Travel": {},
+      "Remote & Wild": {}
+    },
+    "food": {
+      "Street Food": {},
+      "Local Dishes": {},
+      "Drinks": {},
+      "Cafes": {},
+      "Markets": {},
+      "Wine": {},
+      "Beer": {}
+    },
+    "hike": {
+      "Routes": {},
+      "Trails": {},
+      "Refuges": {},
+      "Huts": {},
+      "Viewpoints": {},
+      "Summits": {},
+      "Coordinates": {},
+      "Camping": {},
+      "Wild Camping": {}
+    },
+    "weather_&_nature": {
+      "Weather Tracking": {},
+      "Aurora": {},
+      "Volcano Activity": {},
+      "Best Season": {},
+      "Climate Risks": {}
+    }
   },
   "art": {
     "drawing": {
-      "materials": {},
-      "technique": {}
+      "materials": {
+        "graphite": {},
+        "pencil": {},
+        "charcoal": {},
+        "ink": {}
+      },
+      "technique": {
+        "sketching": {},
+        "rendering": {},
+        "proportion": {}
+      }
     },
     "painting": {
-      "medium": {},
-      "technique": {},
-      "subject": {},
-      "color_theory": {},
-      "brushwork": {}
+      "medium": {
+        "oil": {},
+        "acrylic": {},
+        "watercolor": {},
+        "gouache": {}
+      },
+      "technique": {
+        "alla_prima": {},
+        "glazing": {},
+        "impasto": {},
+        "wet_on_wet": {},
+        "scumbling": {},
+        "underpainting": {},
+        "blocking_in": {},
+        "plein_air": {}
+      },
+      "subject": {
+        "portrait": {},
+        "landscape": {},
+        "still_life": {},
+        "figure": {},
+        "abstract": {},
+        "seascape": {},
+        "wildlife": {}
+      },
+      "color_theory": {
+        "color_mixing": {},
+        "complementary_colors": {},
+        "value": {},
+        "temperature": {},
+        "saturation": {},
+        "color_harmony": {}
+      },
+      "brushwork": {
+        "brush_types": {},
+        "brush_techniques": {},
+        "mark_making": {},
+        "edge_control": {},
+        "texture": {}
+      }
     },
     "materials_and_supplies": {
       "paint": {
-        "brand": {},
-        "color": {},
-        "pigments": {}
+        "brand": {
+          "williamsburg": {},
+          "gamblin": {},
+          "old_holland": {},
+          "winsor_newton": {},
+          "michael_harding": {}
+        },
+        "color": {
+          "titanium_white": {},
+          "cadmium_yellow": {},
+          "ultramarine_blue": {},
+          "burnt_umber": {},
+          "burnt_sienna": {},
+          "alizarin_crimson": {},
+          "viridian_green": {},
+          "yellow_ochre": {},
+          "raw_umber": {},
+          "ivory_black": {}
+        },
+        "pigments": {
+          "single_pigment": {},
+          "transparent": {},
+          "opaque": {},
+          "lightfast": {}
+        }
       },
       "brushes": {
-        "type": {},
-        "bristle": {},
-        "brand": {}
+        "type": {
+          "flat": {},
+          "filbert": {},
+          "round": {},
+          "fan": {},
+          "dagger": {},
+          "rigger": {}
+        },
+        "bristle": {
+          "hog_bristle": {},
+          "synthetic": {},
+          "sable": {}
+        },
+        "brand": {
+          "rosemary_and_co": {}
+        }
       },
-      "surface": {},
-      "medium": {},
-      "tool": {}
+      "surface": {
+        "canvas": {},
+        "linen": {},
+        "panel": {},
+        "paper": {},
+        "primed": {},
+        "oil_primed": {},
+        "acrylic_primed": {},
+        "belgian_linen": {}
+      },
+      "medium": {
+        "linseed_oil": {},
+        "stand_oil": {},
+        "liquin": {},
+        "turpentine": {},
+        "gamsol": {},
+        "impasto_medium": {},
+        "glazing_medium": {}
+      },
+      "tool": {
+        "palette_knife": {},
+        "easel": {},
+        "palette": {},
+        "color_checker": {},
+        "mirror": {},
+        "proportional_divider": {}
+      }
     },
     "techniques_and_method": {
-      "fundamental": {},
-      "oil_painting_rule": {},
-      "application": {}
-    },
-    "studio_setup": {},
-    "finishing": {},
-    "professional_practice": {
-      "busines": {},
-      "marketing": {
-        "social_media": {}
+      "fundamental": {
+        "composition": {},
+        "value_study": {},
+        "perspective": {},
+        "anatomy": {},
+        "light_and_shadow": {},
+        "edges": {}
       },
-      "shipping": {}
+      "oil_painting_rule": {
+        "fat_over_lean": {},
+        "thick_over_thin": {},
+        "slow_over_fast": {}
+      },
+      "application": {
+        "layering": {},
+        "blending": {},
+        "dry_brush": {},
+        "stippling": {},
+        "sgraffito": {}
+      }
+    },
+    "studio_setup": {
+      "lighting": {},
+      "easel": {},
+      "storage": {},
+      "ventilation": {},
+      "workspace_organization": {}
+    },
+    "finishing": {
+      "varnishing": {},
+      "retouch_varnish": {},
+      "final_varnish": {},
+      "framing": {},
+      "photography": {}
+    },
+    "professional_practice": {
+      "busines": {
+        "pricing": {},
+        "exhibitions": {},
+        "galleries": {},
+        "commissions": {},
+        "art_fairs": {}
+      },
+      "marketing": {
+        "portfolio": {},
+        "website": {},
+        "social_media": {
+          "facebook": {},
+          "linkedin": {},
+          "instagram": {}
+        },
+        "artist_statement": {},
+        "photography": {}
+      },
+      "shipping": {
+        "packing": {},
+        "international_shipping": {},
+        "insurance": {}
+      }
     },
     "learning_resource": {
-      "book": {},
-      "video": {},
-      "course": {}
+      "book": {
+        "art_instruction": {},
+        "artist_biography": {},
+        "color_theory": {}
+      },
+      "video": {
+        "tutorials": {},
+        "demonstrations": {}
+      },
+      "course": {
+        "online": {},
+        "workshops": {},
+        "masterclass": {}
+      }
     },
-    "music": {},
+    "music": {
+      "movie_music": {},
+      "classical": {},
+      "composition": {}
+    },
     "goldsmithing": {
-      "technique": {},
-      "materials": {},
-      "tools_&_equipment": {},
-      "product_type": {},
-      "busines": {},
-      "history_&_culture": {},
-      "learning": {}
+      "technique": {
+        "soldering": {},
+        "casting": {},
+        "gilding": {},
+        "plating": {},
+        "polishing": {},
+        "stone setting": {},
+        "chain making": {},
+        "engraving": {},
+        "forging": {},
+        "texturing": {}
+      },
+      "materials": {
+        "silver": {},
+        "gold": {},
+        "brass": {},
+        "copper": {},
+        "gemstones": {},
+        "findings": {},
+        "platinium": {},
+        "titanium": {}
+      },
+      "tools_&_equipment": {
+        "torches": {},
+        "burners": {},
+        "polishers": {},
+        "setters": {},
+        "punches": {},
+        "files": {},
+        "hammers": {},
+        "mandrels": {},
+        "precision tools": {}
+      },
+      "product_type": {
+        "rings": {},
+        "pendants": {},
+        "earrings": {},
+        "necklaces": {},
+        "chains": {},
+        "bracelets": {},
+        "brooches": {}
+      },
+      "busines": {
+        "suppliers": {},
+        "foundries": {},
+        "pricing": {},
+        "workshops": {},
+        "commissions": {}
+      },
+      "history_&_culture": {
+        "traditional techniques": {},
+        "guild history": {},
+        "patron saints": {},
+        "regional styles": {}
+      },
+      "learning": {
+        "tutorials": {},
+        "troubleshooting": {},
+        "beginner tips": {},
+        "advanced techniques": {}
+      }
     },
-    "gardening": {},
-    "crafts": {},
-    "photography": {},
-    "poetry": {},
-    "knitting": {},
-    "sculpting": {},
-    "design": {},
-    "artist": {},
-    "theater": {},
-    "quotes": {}
+    "gardening": {
+      "bonsai": {},
+      "plants": {},
+      "landscaping": {}
+    },
+    "crafts": {
+      "DIY": {},
+      "handmade": {},
+      "mixed_media": {}
+    },
+    "photography": {
+      "landscape": {},
+      "portrait": {},
+      "studio": {},
+      "editing": {},
+      "cyanotype": {}
+    },
+    "poetry": {
+      "modern": {},
+      "classical": {},
+      "haiku": {}
+    },
+    "knitting": {
+      "stitch": {},
+      "patterns": {},
+      "yarn": {}
+    },
+    "sculpting": {
+      "stone": {},
+      "clay": {},
+      "metal": {},
+      "wood": {}
+    },
+    "design": {
+      "retro": {},
+      "modern": {},
+      "graphic": {},
+      "interior": {}
+    },
+    "artist": {
+      "beksinski": {},
+      "goya": {},
+      "church": {},
+      "bierstadt": {},
+      "dali": {}
+    },
+    "theater": {
+      "performance": {},
+      "stagecraft": {},
+      "playwriting": {}
+    },
+    "quotes": {
+      "artist_quotes": {},
+      "inspiration": {}
+    }
   },
   "media": {
-    "book": {}
+    "Movie": {},
+    "TV Show": {},
+    "Book": {
+      "quotes": {}
+    },
+    "Podcasts": {},
+    "Music": {},
+    "Streaming Services": {},
+    "Newspaper": {},
+    "Publishing": {},
+    "Author": {},
+    "Blog": {},
+    "Audiobook": {},
+    "Games": {},
+    "Animation": {},
+    "manga": {},
+    "anime": {},
+    "Reviews": {},
+    "Comic": {}
   },
   "food": {
-    "cooking": {},
-    "recipe": {},
-    "ingredient": {
-      "fruit": {},
-      "spice": {}
+    "cooking": {
+      "Baking": {},
+      "Tips": {},
+      "Grilling": {},
+      "Fermentation": {},
+      "Meal Prep": {}
     },
-    "dining": {},
-    "alcohol": {}
+    "recipe": {
+      "Cakes": {},
+      "Snacks": {},
+      "Drinks": {},
+      "Soups": {},
+      "Salads": {},
+      "Main Courses": {},
+      "Desserts": {}
+    },
+    "ingredient": {
+      "Interesting Products": {},
+      "Fruit": {
+        "avocado": {}
+      },
+      "Vegetables": {},
+      "Cheese": {},
+      "Drinks": {},
+      "Oil": {},
+      "Meat": {},
+      "Seafood": {},
+      "Spices": {
+        "Cinnamon": {}
+      },
+      "Herbs": {},
+      "Nuts": {
+        "walnuts": {},
+        "cashew": {},
+        "almonds": {},
+        "pine": {},
+        "sunflower": {},
+        "hazelnut": {},
+        "brazillian nuts": {}
+      },
+      "Grains": {
+        "buckwheat": {},
+        "wheat": {},
+        "rye": {}
+      },
+      "Honey": {},
+      "Coffee": {},
+      "tea": {}
+    },
+    "dining": {
+      "Restaurants": {},
+      "Cafe": {},
+      "Street Food": {},
+      "Fine Dining": {},
+      "Food Trucks": {},
+      "vineyard": {},
+      "brewery": {}
+    },
+    "alcohol": {
+      "Wine": {},
+      "Beer": {},
+      "Liqueur": {},
+      "Mead": {}
+    }
   },
   "technology": {
     "it": {
-      "equipment": {},
-      "cloud_computing": {},
-      "database": {}
+      "Gadgets": {},
+      "Web Development": {},
+      "Mobile Apps": {},
+      "Software Programs": {},
+      "Equipment": {
+        "phone": {},
+        "laptop": {},
+        "pc": {}
+      },
+      "Design": {},
+      "3D Printing": {},
+      "Electronics": {},
+      "Innovation": {},
+      "website": {},
+      "Cloud Computing": {
+        "AWS": {},
+        "Azure": {},
+        "Google Cloud": {},
+        "Docker": {},
+        "Kubernetes": {}
+      },
+      "Cybersecurity": {},
+      "Database": {
+        "SQL": {},
+        "NoSQL": {},
+        "PostgreSQL": {},
+        "MongoDB": {},
+        "SQLite": {}
+      },
+      "QA": {}
     },
-    "software_development": {},
-    "programming_language": {},
-    "trend": {},
+    "software_development": {
+      "Programming Basics": {},
+      "Algorithms": {},
+      "DevOps": {},
+      "APIs": {},
+      "Version Control": {},
+      "Testing": {}
+    },
+    "programming_language": {
+      "C#": {},
+      "Python": {},
+      "JavaScript": {},
+      "Java": {},
+      "React": {},
+      "Node.js": {},
+      "C++": {},
+      "Rust": {},
+      "TypeScript": {}
+    },
+    "seo": {},
+    "trend": {
+      "Blockchain": {},
+      "IoT": {},
+      "Cloud Computing": {},
+      "Automation": {},
+      "Agentic": {}
+    },
     "ai_ml": {
-      "model": {},
-      "ai_tool": {},
-      "automation": {}
+      "RAG": {},
+      "agentic": {},
+      "genAI": {},
+      "prompts": {},
+      "models": {
+        "gemini": {},
+        "perplexity": {},
+        "claude": {},
+        "sonnet": {},
+        "grok": {},
+        "chatgpt": {},
+        "deepseek": {},
+        "copilot": {},
+        "opus": {}
+      },
+      "ai tools": {
+        "google ai studio": {},
+        "ElevenLabs": {},
+        "HeyGen": {},
+        "notebookLM": {},
+        "image generator": {},
+        "FireFly": {},
+        "Riverside ": {},
+        "sora": {}
+      },
+      "automation": {
+        "templates": {}
+      }
     }
   },
   "finance": {
-    "shopping": {},
-    "busines": {},
-    "company": {}
+    "Investing": {},
+    "Saving": {},
+    "Budgeting": {},
+    "Cryptocurrency": {},
+    "Real Estate": {},
+    "echange": {},
+    "Personal Finance": {},
+    "Shopping": {
+      "discount code": {}
+    },
+    "ETF": {},
+    "Bonds": {},
+    "Retirement Planning": {},
+    "Taxes": {},
+    "Financial Literacy": {},
+    "Wealth Management": {},
+    "business": {
+      "business advice": {},
+      "startup": {},
+      "name idea": {}
+    },
+    "company": {
+      "remote": {},
+      "hybrid": {},
+      "on site": {}
+    }
   },
   "education": {
-    "learning": {}
+    "Learning": {
+      "instructions": {},
+      "SOP": {},
+      "templates": {}
+    },
+    "Courses": {},
+    "Online Education": {},
+    "Skill Development": {},
+    "Workshops": {},
+    "Seminars": {},
+    "study tips": {},
+    "research": {},
+    "Motivation": {}
   },
   "career": {
-    "networking": {},
-    "person": {}
+    "Job Search": {},
+    "Resume Building": {},
+    "Interview Tips": {},
+    "Networking": {
+      "people": {},
+      "meetups": {}
+    },
+    "Professional Development": {},
+    "Workplace Skills": {},
+    "People": {
+      "quotes": {}
+    },
+    "Career Change": {}
   },
   "person": {
-    "contact": {}
+    "contact": {
+      "social_media": {},
+      "whatsapp": {},
+      "phone": {},
+      "signal": {}
+    },
+    "address": {}
   },
   "cybersecurity": {
-    "network_security": {}
+    "Hacking": {},
+    "Data Protection": {},
+    "Privacy": {},
+    "Network Security": {
+      "Router": {}
+    },
+    "Ethical Hacking": {},
+    "Passwords": {},
+    "Cryptography": {},
+    "Programs": {},
+    "Phishing": {},
+    "Online Safety": {},
+    "Dark Web": {}
   },
-  "kids": {},
-  "idea": {},
-  "shopping": {},
-  "trivia": {},
-  "event": {},
-  "humor": {},
+  "kids": {
+    "Parenting": {},
+    "Education": {},
+    "Activities": {},
+    "Health": {},
+    "Nutrition": {},
+    "Development": {},
+    "Games": {},
+    "Crafts": {},
+    "Storytelling": {}
+  },
+  "idea": {
+    "Startup Ideas": {},
+    "Business Plans": {},
+    "Product Development": {},
+    "Innovation": {},
+    "Brainstorming": {},
+    "Names": {},
+    "painting": {},
+    "Painting": {},
+    "Creativity": {},
+    "Inventions": {},
+    "crafts": {},
+    "business": {}
+  },
+  "shopping": {
+    "Gift Ideas": {},
+    "Discount Codes": {},
+    "Reviews": {},
+    "Sustainable Products": {},
+    "To buy": {}
+  },
+  "trivia": {
+    "Fun Facts": {},
+    "History Facts": {},
+    "Science Facts": {},
+    "Cultural Facts": {}
+  },
+  "event": {
+    "Conferences": {},
+    "Meetups": {},
+    "Workshops": {},
+    "Networking Events": {},
+    "Exhibitions": {},
+    "Festivals": {},
+    "Webinars": {}
+  },
+  "humor": {
+    "jokes": {},
+    "memes": {},
+    "funny images": {}
+  },
   "life": {
-    "agency": {}
+    "Taxes": {},
+    "Insurance": {},
+    "agency": {
+      "zus": {},
+      "msz": {},
+      "customs": {},
+      "post": {},
+      "urzad skarbowy": {},
+      "urzad pracy": {}
+    }
   },
-  "transportation": {},
-  "other": {}
+  "transportation": {
+    "car": {},
+    "ferry": {},
+    "bus": {}
+  },
+  "other": {
+    "Lifestyle": {},
+    "Hobbies": {}
+  }
 }
