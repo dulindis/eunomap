@@ -13,7 +13,8 @@ _inflect = inflect.engine()
 # Load hierarchy from file
 def load_hierarchy(file_path: str = "hierarchy.json") -> dict:
     with open(file_path, "r", encoding="utf-8") as f:
-        return normalize_hierarchy(json.load(f), 3)
+        # return normalize_hierarchy(json.load(f), 3)
+        return normalize_hierarchy(json.load(f), 4)
 
 
 # Normalize hierarchy json

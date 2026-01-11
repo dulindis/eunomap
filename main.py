@@ -10,8 +10,12 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy import text
 from sqlalchemy.orm import Session
-import whisper
 
+try:
+    import whisper
+except Exception as e:
+    print("Whisper not loaded:", e)
+    whisper = None
 from auth import create_access_token, verify_access_token
 from config import Config
 import db
