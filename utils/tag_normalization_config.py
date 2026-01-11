@@ -266,4 +266,7 @@ ALIASES = {
     "scent": "fragrance",
     "taxes": "tax",
     "paint": "color",
+    "town": "city",
+    "application": "app",
+    "tor": "dark web",
 }

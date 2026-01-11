@@ -115,6 +115,7 @@
       "Ankles",
       "Feet",
       "Skin",
+      "Nails",
       "Hormones",
       "Joints",
       "Muscles"
@@ -184,17 +185,20 @@
     "Outdoors",
     "Home Workouts",
     "Sport",
-    ["Kayaking", "Hiking", "Running", "Stretching", "swimming"]
+    ["Kayaking", "Hiking", "Running", "Stretching", "swimming", "Dance"]
   ],
   "Fashion": [
     "Clothes Brands",
+    "Underwear",
     "Shoes",
     "Accessories",
     "Style",
     "Inspiration",
     "Trends",
+    "Design",
     "Sustainable Fashion",
-    "Vintage Style"
+    "Vintage Style",
+    "Textile"
   ],
   "Cosmetics": [
     "Makeup",
@@ -203,7 +207,10 @@
     "Haircare",
     ["Conditioner", "Shampoo", "Dye"],
     "Fragrance",
+    "Mouth",
+    ["Toothpaste", "Mouthwash"],
     "Beauty Tips",
+    "Brands",
     "Products",
     [
       "Tested",
@@ -311,7 +318,8 @@
     },
     "Place Types": [
       "Cities",
-      "Towns & Villages",
+      ["Krakow", "Kudowa zdrój", "wrocław", "stockholmd"],
+      "Villages",
       "Monuments",
       "Castles & Ruins",
       "National Parks",
@@ -543,9 +551,11 @@
         "brass",
         "copper",
         "gemstones",
+        ["ruby", "emerald", "topaz", "aquamarine", "diamond", "saphire"],
         "findings",
         "platinium",
-        "titanium"
+        "titanium",
+        "meteorites"
       ],
       "Tools & Equipment": [
         "torches",
@@ -678,8 +688,9 @@
     "IT": [
       "Gadgets",
       "Web Development",
-      "Mobile Apps",
-      "Software Programs",
+      "Apps",
+      "Software",
+      ["VPN", "toolbox"],
       "Equipment",
       ["phone", "laptop", "pc"],
       "Design",
@@ -694,7 +705,8 @@
       ["SQL", "NoSQL", "PostgreSQL", "MongoDB", "SQLite"],
       "QA",
       "tokens",
-      "auth"
+      "auth",
+      "space"
     ],
     "Software Development": [
       "Programming Basics",
@@ -774,6 +786,8 @@
     ["remote", "hybrid", "on site"],
     "bank"
   ],
+  "Economy": ["index"],
+  "military": [],
   "Education": [
     "Learning",
     ["instructions", "SOP", "templates"],
@@ -817,7 +831,8 @@
     "Phishing",
     "Online Safety",
     "Dark Web",
-    "auth"
+    "auth",
+    "privacy"
   ],
   "Kids": [
     "Parenting",
@@ -843,7 +858,8 @@
     "Creativity",
     "Inventions",
     "crafts",
-    "business"
+    "business",
+    "insigtful"
   ],
   "Shopping": [
     "Gift Ideas",
@@ -874,7 +890,7 @@
     ["zus", "msz", "customs", "post", "urzad skarbowy", "urzad pracy"],
     "planning"
   ],
-  "Transportation": ["car", ["tires"], "ferry", "bus", "airpolanes"],
+  "Transportation": ["car", ["tires"], "ferry", "bus", "airpolanes", "space"],
 
-  "Others": ["Lifestyle", "Hobbies", "Diary", "Dreams", "insigtful"]
+  "Others": ["Lifestyle", "Hobbies", "Diary", "Dreams", "draft"]
 }
