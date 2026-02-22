@@ -281,6 +281,56 @@ def get_or_create_tag(
     return tag
 
 
+def get_or_create_tag_by_path(db: Session, path_string: str) -> Tag:
+    """
+    Gets or creates a tag by a full hierarchical path, e.g. "health/doctor/cardiologist".
+    Creates any missing intermediary parent tags automatically.
+    """
+    parts = [p.strip() for p in path_string.strip('/').split('/') if p.strip()]
+    if not parts:
+        raise ValueError("Empty tag path")
+        
+    parent = None
+    tag = None
+    
+    for part in parts:
+        # For the first part, allow it to be placed in 'others' if not a known root
+        auto_others = (parent is None)
+        tag = get_or_create_tag(db, part, parent=parent, auto_others=auto_others)
+        parent = tag
+        
+    return tag
+
+
+def get_notes_by_subtree(db: Session, root_path: str):
+    """
+    Fetch all notes associated with a given tag path, or any of its children.
+    E.g. "health/doctor" matches "health/doctor" and "health/doctor/cardiologist".
+    """
+    from models import Note
+    
+    # Normalize the incoming path to match DB slug paths
+    parts = [p.strip() for p in root_path.strip('/').split('/') if p.strip()]
+    slug_parts = [tag_processor.slugify(p) for p in parts]
+    
+    # Fallback if empty path
+    if not slug_parts:
+        return db.query(Note).all()
+        
+    # The prefix to search for, e.g. "/health/doctor" or "/health/doctor/%"
+    prefix = "/" + "/".join(slug_parts)
+    
+    # Use LIKE to match the exact tag or any children
+    notes = (
+        db.query(Note)
+        .join(Note.tags)
+        .filter(Tag.path.like(f"{prefix}%"))
+        .distinct()
+        .all()
+    )
+    return notes
+
+
 # Add tags to the database
 def add_tags(
     hierarchy,

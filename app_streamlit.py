@@ -5,7 +5,7 @@ import requests
 import streamlit as st
 from datetime import datetime
 from PIL import Image
-from utils import get_suggestions
+from utils.tag_utils import get_suggestions
 from utils.hierarchy_utils import build_flat_mapping, flatten_all_tags, load_hierarchy
 
 from streamlit_tags import st_tags

@@ -76,6 +76,7 @@
       "Relax",
       "Essential Oils"
     ],
+    "Accessories":[],
     "Therapy": ["Physical Therapy", "Psychotherapy"],
     "Mental Health": [
       "Anxiety",
@@ -224,6 +225,12 @@
       "Sun Protection"
     ]
   ],
+  "Construction": {
+    "Material": [],
+    "Furniture": [],
+    "Finishes": ["paint", "wallpaper", "flooring"],
+    "Tools": []
+  },
   "Household": {
     "Washing": ["Detergent", "Laundry Care", "Fabric Softener"],
     "Cleaning": [
@@ -233,6 +240,7 @@
       "Disinfection",
       "Odor Control"
     ],
+
     "Home Improvement": [
       "DIY Projects",
       "Repairs",
@@ -682,10 +690,10 @@
       ],
       "Shipping": ["packing", "international_shipping", "insurance"]
     },
-    "Learning_Resources": {
-      "Books": ["art_instruction", "artist_biography", "color_theory"],
-      "Videos": ["tutorials", "demonstrations"],
-      "Courses": ["online", "workshops", "masterclass"]
+    "Learning_Resource": {
+      "Book": ["art_instruction", "artist_biography", "color_theory"],
+      "Video": ["tutorials", "demonstrations"],
+      "Course": ["online", "workshops", "masterclass"]
     },
     "Music": ["movie_music", "classical", "composition"],
     "Goldsmithing": {
@@ -752,7 +760,7 @@
         "troubleshooting",
         "beginner tips",
         "advanced techniques",
-        "books"
+        "book"
       ]
     },
     "Gardening": ["bonsai", "plants", "landscaping"],
@@ -937,8 +945,7 @@
     ],
     "Wealth Management": ["Investing", "Portfolio Management", "Retirement"],
     "Accounts & Plans": ["IKE", "IKZE", "OIPE", "PPK"],
-    "Business": ["Business Advice", "Startup", "Company", "worth investing"],
-    "office presence": ["remote", "hybrid", "on site"]
+    "Business": ["Business Advice", "Startup", "Company", "worth investing"]
   },
   "Shopping": [
     "Gift Ideas",
@@ -971,7 +978,9 @@
       "Professional Development",
       "Workplace Skills"
     ],
-    "Networking & People": ["Networking", "People", "Meetups", "Dating"]
+    "Networking & People": ["Networking", "People", "Meetups", "Dating"],
+    "Companies": ["potential employers", "to avoid"],
+    "office presence": ["remote", "hybrid", "on site"]
   },
   "People": {
     "Contact Methods": ["Social Media", "WhatsApp", "Phone", "Signal"],
@@ -997,6 +1006,9 @@
       "EDR"
     ],
     "Passwords & Access": ["Passwords", "Auth"]
+  },
+  "Safety":{
+
   },
   "Kids": [
     "Parenting",

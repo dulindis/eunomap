@@ -21,6 +21,9 @@ passlib = "^1.7.4"
 # Optional heavy ML packages
 whisper = "^1.1.10"
 openai-whisper = {git = "https://github.com/openai/whisper.git"}
+pyyaml = "^6.0.3"
+streamlit = "^1.54.0"
+streamlit-tags = "^1.2.8"
 
 [tool.poetry.group.dev.dependencies]
 uvicorn = "^0.40.0"

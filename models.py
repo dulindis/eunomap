@@ -31,12 +31,14 @@ class Note(Base):
     __tablename__ = "notes"
 
     id = Column(Integer, primary_key=True, index=True)
+    title = Column(String, nullable=True)
     content = Column(Text, nullable=True)  # The text note
 
     media_path = Column(String, nullable=True)  # "static/uploads/image.png"
     media_type = Column(String, default="text")  # text, image, pdf
 
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     owner_id = Column(
         Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=True

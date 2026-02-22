@@ -269,4 +269,6 @@ ALIASES = {
     "town": "city",
     "application": "app",
     "tor": "dark web",
+
+    "safety":"security"
 }
