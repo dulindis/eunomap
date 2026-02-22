@@ -36,6 +36,7 @@ class Note(Base):
 
     media_path = Column(String, nullable=True)  # "static/uploads/image.png"
     media_type = Column(String, default="text")  # text, image, pdf
+    link = Column(String, nullable=True)  # Optional external link
 
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))

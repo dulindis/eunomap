@@ -16,7 +16,7 @@ try:
 except Exception as e:
     print("Whisper not loaded:", e)
     whisper = None
-    
+
 # Load Whisper model once (small for CPU testing)
 try:
     if whisper:
@@ -26,7 +26,7 @@ try:
 except Exception as e:
     print("Whisper model not loaded:", e)
     model = None
-    
+
 from auth import create_access_token, verify_access_token
 from config import Config
 import db
@@ -103,7 +103,7 @@ def read_root():
     Root endpoint - redirects to the Streamlit UI or provides info.
     """
     from fastapi.responses import HTMLResponse
-    
+
     html_content = """
     <!DOCTYPE html>
     <html>
@@ -149,17 +149,17 @@ def create_note(
         note.media_path = f"static/uploads/{safe_filename}"
 
     tag_list = [t.strip().lower() for t in tags.split(",") if t.strip()]
-    
+
     # First pass: resolve all tags, collecting existing tags for context
     resolved_tags = []
     from utils.tag_utils import tag_processor
-    
+
     for tag_name in tag_list:
         normalized_key = tag_processor.normalize(tag_name)
-        
+
         # Find ALL tags with this key (there might be multiple in different hierarchies)
         existing_tags = db.query(Tag).filter(Tag.key == normalized_key).all()
-        
+
         if len(existing_tags) == 0:
             # No existing tag found, will create later
             resolved_tags.append((tag_name, None, existing_tags))
@@ -169,14 +169,14 @@ def create_note(
         else:
             # Multiple matches - will resolve with context after we have all tags
             resolved_tags.append((tag_name, None, existing_tags))
-    
+
     # Second pass: resolve ambiguous tags using context from already-resolved tags
     # Build context from tags we've already resolved
     context_paths = set()
     for tag_name, tag, _ in resolved_tags:
         if tag:
             context_paths.add(tag.path)
-    
+
     # Now resolve ambiguous tags using context
     final_tags = []
     for tag_name, initial_tag, candidates in resolved_tags:
@@ -197,11 +197,14 @@ def create_note(
             parent_tag = _find_best_parent_for_new_tag(db, tag_name, context_paths)
             if parent_tag:
                 from utils.tag_utils import get_or_create_tag
-                new_tag = get_or_create_tag(db, tag_name, parent=parent_tag, auto_others=False)
+
+                new_tag = get_or_create_tag(
+                    db, tag_name, parent=parent_tag, auto_others=False
+                )
             else:
                 new_tag = get_or_create_tag(db, tag_name, auto_others=True)
             final_tags.append(new_tag)
-    
+
     # Add all tags to note
     for tag in final_tags:
         note.tags.append(tag)
@@ -218,16 +221,16 @@ def _resolve_tag_by_context_paths(candidates: list, context_paths: set) -> "Tag 
     """
     if not context_paths or not candidates:
         return None
-    
+
     best_candidate = None
     best_match_length = 0
-    
+
     for candidate in candidates:
         candidate_parts = candidate.path.strip("/").split("/")
-        
+
         for context_path in context_paths:
             context_parts = context_path.strip("/").split("/")
-            
+
             # Find common prefix length
             common_length = 0
             for i, (cp, ct) in enumerate(zip(candidate_parts, context_parts)):
@@ -235,48 +238,55 @@ def _resolve_tag_by_context_paths(candidates: list, context_paths: set) -> "Tag 
                     common_length += 1
                 else:
                     break
-            
+
             # Prefer candidates that share a common parent with context
             # e.g., /pets/health shares /pets with /pets/cats
-            if common_length >= len(context_parts) and common_length > best_match_length:
+            if (
+                common_length >= len(context_parts)
+                and common_length > best_match_length
+            ):
                 best_match_length = common_length
                 best_candidate = candidate
-    
+
     return best_candidate
 
 
-def _find_best_parent_for_new_tag(db: Session, tag_name: str, context_paths: set) -> "Tag | None":
+def _find_best_parent_for_new_tag(
+    db: Session, tag_name: str, context_paths: set
+) -> "Tag | None":
     """
     Find the best parent tag for a new tag based on context from other tags.
     If we have 'cats' (path /pets/cats) and add 'food', prefer /pets/food over /others/food.
     """
     if not context_paths:
         return None
-    
+
     from utils.tag_utils import tag_processor
+
     normalized = tag_processor.normalize(tag_name)
-    
+
     # For each context path, try to find a parent that could be a sibling
     for context_path in context_paths:
         context_parts = context_path.strip("/").split("/")
-        
+
         if len(context_parts) >= 2:
             # Get the parent path (e.g., /pets from /pets/cats)
             parent_path = "/".join(context_parts[:-1])
             parent_tag = db.query(Tag).filter(Tag.path == f"/{parent_path}").first()
             if parent_tag:
                 return parent_tag
-        
+
         # Also check if first part could be a root
         if len(context_parts) >= 1:
             root_name = context_parts[0]
-            root_tag = db.query(Tag).filter(
-                Tag.path == f"/{root_name}",
-                Tag.parent_id.is_(None)
-            ).first()
+            root_tag = (
+                db.query(Tag)
+                .filter(Tag.path == f"/{root_name}", Tag.parent_id.is_(None))
+                .first()
+            )
             if root_tag:
                 return root_tag
-    
+
     return None
 
 
@@ -730,7 +740,7 @@ def attach_tag_to_note(
     db: Session = Depends(get_db),
 ):
     """Attach an existing tag to a note."""
-    from schemas import NoteOut
+    from schemas import NoteOut, TagOut
 
     note = db.query(Note).filter(Note.id == input.note_id).first()
     if not note:
@@ -743,8 +753,22 @@ def attach_tag_to_note(
     if tag not in note.tags:
         note.tags.append(tag)
         db.commit()
+        db.refresh(note)
 
-    return NoteOut.model_validate(note)
+    # Build the response manually to avoid validation issues
+    return NoteOut(
+        id=note.id,
+        title=note.title,
+        content=note.content,
+        media_path=note.media_path,
+        media_type=note.media_type,
+        link=note.link,
+        created_at=note.created_at,
+        updated_at=note.updated_at,
+        tags=[
+            TagOut(id=t.id, label=t.label, path=t.path, stats=None) for t in note.tags
+        ],
+    )
 
 
 @app.get("/tags/mode")

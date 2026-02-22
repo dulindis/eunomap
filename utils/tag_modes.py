@@ -315,7 +315,8 @@ class PathTagStrategy(TagStrategy):
                         context_hint=f"Matched based on existing tags: {existing_tags}"
                     )
             
-            # Return all candidates for user to choose
+            # Return only exact matches (same label) for disambiguation
+            # Don't include partial matches in label OR path - just exact label matches
             return TagResolutionResult(
                 status="multiple_matches",
                 candidates=[
@@ -386,21 +387,30 @@ class PathTagStrategy(TagStrategy):
     def _suggest_parent_categories(self, db: Session, name: str) -> list[TagCandidate]:
         """
         Suggest existing categories that could be parents for a new tag.
-        Only returns suggestions if there are related matches - not random categories.
+        Shows exact matches first, then partial matches (in label OR path), up to 7 total.
         """
-        # Only suggest if the tag name has some similarity to existing tags
-        # Otherwise return empty list - don't confuse users with random suggestions
         normalized = tag_processor.normalize(name)
         
-        # Look for tags that contain the search term (partial match)
-        similar_tags = db.query(Tag).filter(
-            Tag.label.ilike(f"%{normalized}%")
-        ).limit(5).all()
+        # First: exact match on label
+        exact_matches = db.query(Tag).filter(
+            Tag.label == normalized
+        ).all()
         
-        if similar_tags:
+        # Second: partial matches - search in both label AND path
+        # This finds tags like "clothing_brands" when searching for "brands"
+        partial_matches = db.query(Tag).filter(
+            (Tag.label.ilike(f"%{normalized}%")) | (Tag.path.ilike(f"%{normalized}%")),
+            ~Tag.label.in_([t.label for t in exact_matches])  # exclude exact matches
+        ).limit(7).all()
+        
+        # Combine: exact matches first, then partial, max 7
+        all_candidates = exact_matches + partial_matches
+        all_candidates = all_candidates[:7]  # Limit to 7
+        
+        if all_candidates:
             return [
                 TagCandidate(id=t.id, label=t.label, path=t.path)
-                for t in similar_tags
+                for t in all_candidates
             ]
         
         # No similar tags found - return empty list

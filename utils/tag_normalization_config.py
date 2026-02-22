@@ -241,6 +241,7 @@ ALIASES = {
     "italiano": "italian",
     "português": "portuguese",
     "中文": "chinese",
+    "urząd skarbowy":"tax office",
     # =========================================================================
     # Business & General Terms
     # =========================================================================

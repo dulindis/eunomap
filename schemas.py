@@ -127,7 +127,8 @@ class NoteOut(BaseModel):
     title: Optional[str] = None
     content: Optional[str] = None
     media_path: Optional[str] = None
-    media_type: str
+    media_type: Optional[str] = None
+    link: Optional[str] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
     tags: List[TagOut]
