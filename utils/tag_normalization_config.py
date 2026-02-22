@@ -76,6 +76,7 @@ DO_NOT_SINGULARIZE = {
     # =========================================================================
     "accessories",
     "basics",
+    "brands",
     "cosmetics",
     "electronics",
     "groceries",
@@ -256,6 +257,7 @@ ALIASES = {
     # =========================================================================
     # Taxonomy Preferences (Canonical Forms)
     # =========================================================================
+    "brand": "brands",
     "breweries": "brewery",
     "children": "kids",
     "exercise": "workout",
@@ -269,6 +271,5 @@ ALIASES = {
     "town": "city",
     "application": "app",
     "tor": "dark web",
-
-    "safety":"security"
+    "safety": "security",
 }

@@ -94,11 +94,11 @@ def resolve_tags_with_disambiguation(
             result = r.json()
             if result.get("status") == "multiple_matches":
                 disambiguation_needed[tag] = result.get("candidates", [])
-            elif result.get("status") == "not_found" and result.get(
-                "suggested_parents"
-            ):
-                # Also show suggestions for new tags that could have parents
-                disambiguation_needed[tag] = result.get("suggested_parents", [])
+            elif result.get("status") == "not_found":
+                # Tag doesn't exist - add to disambiguation to show "not found" message
+                # Only add suggestions if there are actual related matches
+                suggested = result.get("suggested_parents", [])
+                disambiguation_needed[tag] = suggested if suggested else []
 
     return disambiguation_needed
 
@@ -136,30 +136,37 @@ if st.button("Save Note"):
 
     if disambiguation_needed:
         st.warning("⚠️ Some tags need your attention:")
-
+        
         for tag in st.session_state.selected_tags:
             if tag in disambiguation_needed:
                 candidates = disambiguation_needed[tag]
-
+                
                 # Show selection for this tag
                 st.markdown(f"**{tag}**")
-                for i, c in enumerate(candidates):
-                    st.markdown(f"  - {c.get('label')} → `{c.get('path')}`")
+                
+                if candidates:
+                    # Show available paths to choose from
+                    for i, c in enumerate(candidates):
+                        st.markdown(f"  - {c.get('label')} → `{c.get('path')}`")
+                    
+                    # Let user select
+                    options = [f"{c.get('path')}" for c in candidates]
+                    options.append("➕ Create new tag under 'others'")
+                    
+                    selected_path = st.radio(
+                        f"Choose path for '{tag}':", options, key=f"radio_{tag}"
+                    )
 
-                # Let user select
-                options = [f"{c.get('path')}" for c in candidates]
-                options.append("➕ Create new tag under 'others'")
-
-                selected_path = st.radio(
-                    f"Choose path for '{tag}':", options, key=f"radio_{tag}"
-                )
-
-                if selected_path == "➕ Create new tag under 'others'":
-                    final_tags.append(tag)
+                    if selected_path == "➕ Create new tag under 'others'":
+                        final_tags.append(tag)
+                    else:
+                        # Use the selected path - extract the label
+                        final_tags.append(selected_path.split("/")[-1])
                 else:
-                    # Use the selected path - we need to extract the label
-                    # The path will be like /pets/cats, we need "cats"
-                    final_tags.append(selected_path.split("/")[-1])
+                    # No similar tags found - tag doesn't exist in tree
+                    st.info(f"❌ Tag '{tag}' doesn't exist in the current hierarchy")
+                    st.markdown("  Will create new tag under 'others'")
+                    final_tags.append(tag)
             else:
                 final_tags.append(tag)
 

@@ -384,13 +384,28 @@ class PathTagStrategy(TagStrategy):
         return best_candidate
     
     def _suggest_parent_categories(self, db: Session, name: str) -> list[TagCandidate]:
-        """Suggest existing categories that could be parents for a new tag."""
-        # Get root-level tags that might be good parents
-        root_tags = db.query(Tag).filter(Tag.parent_id.is_(None)).all()
-        return [
-            TagCandidate(id=t.id, label=t.label, path=t.path)
-            for t in root_tags[:5]  # Limit suggestions
-        ]
+        """
+        Suggest existing categories that could be parents for a new tag.
+        Only returns suggestions if there are related matches - not random categories.
+        """
+        # Only suggest if the tag name has some similarity to existing tags
+        # Otherwise return empty list - don't confuse users with random suggestions
+        normalized = tag_processor.normalize(name)
+        
+        # Look for tags that contain the search term (partial match)
+        similar_tags = db.query(Tag).filter(
+            Tag.label.ilike(f"%{normalized}%")
+        ).limit(5).all()
+        
+        if similar_tags:
+            return [
+                TagCandidate(id=t.id, label=t.label, path=t.path)
+                for t in similar_tags
+            ]
+        
+        # No similar tags found - return empty list
+        # User can still create new tag under "others"
+        return []
     
     def get_or_create_tag(
         self, db: Session, name: str, parent: Tag | None = None

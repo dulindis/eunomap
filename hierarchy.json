@@ -76,7 +76,7 @@
       "Relax",
       "Essential Oils"
     ],
-    "Accessories":[],
+    "Accessories": [],
     "Therapy": ["Physical Therapy", "Psychotherapy"],
     "Mental Health": [
       "Anxiety",
@@ -191,17 +191,26 @@
     "Sport",
     ["Kayaking", "Hiking", "Running", "Stretching", "swimming", "Dance"]
   ],
-  "Fashion": [
-    "Clothes Brands",
-    "Underwear",
-    "Shoes",
-    "Accessories",
-    "Style",
-    "Trends",
-    "Design",
-    "Sustainable Fashion",
-    "Textile"
-  ],
+  "Fashion": {
+    "Cothing Brands": [],
+    "clothes": [
+      "shirts",
+      "pants",
+      "dresses",
+      "skirts",
+      "jackets",
+      "sweaters",
+      "Underwear",
+      "socks"
+    ],
+    "Shoes": ["sneakers", "boots", "heels"],
+    "Accessories": [],
+    "Style": [],
+    "Trends": [],
+    "Design": [],
+    "Sustainable Fashion": [],
+    "Textile": ["wool", "silk", "cupro"]
+  },
   "Cosmetics": [
     "Makeup",
     "Skincare",
@@ -535,7 +544,8 @@
       "Aurora",
       "Volcano Activity",
       "Best Season",
-      "Climate Risks"
+      "Climate Risks",
+      "astronomy"
     ]
   },
   "Art": {
@@ -765,7 +775,14 @@
     },
     "Gardening": ["bonsai", "plants", "landscaping"],
     "Crafts": ["DIY", "handmade", "mixed_media"],
-    "Photography": ["landscape", "portrait", "studio", "editing", "cyanotype"],
+    "Photography": [
+      "landscape",
+      "portrait",
+      "studio",
+      "editing",
+      "cyanotype",
+      "astro"
+    ],
     "Poetry": ["modern", "classical", "haiku"],
     "Knitting": ["stitch", "patterns", "yarn"],
     "Sculpting": ["stone", "clay", "metal", "wood"],
@@ -1007,9 +1024,7 @@
     ],
     "Passwords & Access": ["Passwords", "Auth"]
   },
-  "Safety":{
-
-  },
+  "Safety": {},
   "Kids": [
     "Parenting",
     "Education",
@@ -1055,6 +1070,16 @@
   ],
   "Humor": ["jokes", "memes", "funny images"],
   "Life": ["Insurance", "life planning"],
+  "adult": [
+    "porn",
+    "toys",
+    "erotica",
+    "kink",
+    "bdsm",
+    "fetish",
+    "bondage",
+    "discipline"
+  ],
   "admin": ["zus", "msz", "customs", "post", "urzad skarbowy", "urzad pracy"],
   "Transportation": ["car", ["tires"], "ferry", "bus", "airpolanes", "space"],
 
