@@ -149,23 +149,135 @@ def create_note(
         note.media_path = f"static/uploads/{safe_filename}"
 
     tag_list = [t.strip().lower() for t in tags.split(",") if t.strip()]
+    
+    # First pass: resolve all tags, collecting existing tags for context
+    resolved_tags = []
+    from utils.tag_utils import tag_processor
+    
     for tag_name in tag_list:
-        # First, try to find existing tag by label (anywhere in hierarchy)
-        from utils.tag_utils import tag_processor
         normalized_key = tag_processor.normalize(tag_name)
-        existing_tag = db.query(Tag).filter(Tag.key == normalized_key).first()
         
-        if existing_tag:
-            tag = existing_tag
+        # Find ALL tags with this key (there might be multiple in different hierarchies)
+        existing_tags = db.query(Tag).filter(Tag.key == normalized_key).all()
+        
+        if len(existing_tags) == 0:
+            # No existing tag found, will create later
+            resolved_tags.append((tag_name, None, existing_tags))
+        elif len(existing_tags) == 1:
+            # Single match - use it
+            resolved_tags.append((tag_name, existing_tags[0], existing_tags))
         else:
-            # No existing tag found, create new one under "others"
-            tag = get_or_create_tag(db, tag_name, auto_others=True)
-        
+            # Multiple matches - will resolve with context after we have all tags
+            resolved_tags.append((tag_name, None, existing_tags))
+    
+    # Second pass: resolve ambiguous tags using context from already-resolved tags
+    # Build context from tags we've already resolved
+    context_paths = set()
+    for tag_name, tag, _ in resolved_tags:
+        if tag:
+            context_paths.add(tag.path)
+    
+    # Now resolve ambiguous tags using context
+    final_tags = []
+    for tag_name, initial_tag, candidates in resolved_tags:
+        if initial_tag:
+            # Already resolved uniquely
+            final_tags.append(initial_tag)
+        elif candidates:
+            # Multiple matches - find best using context
+            best_tag = _resolve_tag_by_context_paths(candidates, context_paths)
+            if best_tag:
+                final_tags.append(best_tag)
+            else:
+                # No clear winner - pick the first one (or could show UI to choose)
+                final_tags.append(candidates[0])
+        else:
+            # No existing tags - create new one
+            # Check if we can place it under an existing tag from the note
+            parent_tag = _find_best_parent_for_new_tag(db, tag_name, context_paths)
+            if parent_tag:
+                from utils.tag_utils import get_or_create_tag
+                new_tag = get_or_create_tag(db, tag_name, parent=parent_tag, auto_others=False)
+            else:
+                new_tag = get_or_create_tag(db, tag_name, auto_others=True)
+            final_tags.append(new_tag)
+    
+    # Add all tags to note
+    for tag in final_tags:
         note.tags.append(tag)
 
     db.commit()
     db.refresh(note)
     return note
+
+
+def _resolve_tag_by_context_paths(candidates: list, context_paths: set) -> "Tag | None":
+    """
+    Resolve ambiguous tags using paths from other tags in the note as context.
+    If we have 'cats' with path '/pets/cats' and 'health', prefer '/pets/health' over '/health'.
+    """
+    if not context_paths or not candidates:
+        return None
+    
+    best_candidate = None
+    best_match_length = 0
+    
+    for candidate in candidates:
+        candidate_parts = candidate.path.strip("/").split("/")
+        
+        for context_path in context_paths:
+            context_parts = context_path.strip("/").split("/")
+            
+            # Find common prefix length
+            common_length = 0
+            for i, (cp, ct) in enumerate(zip(candidate_parts, context_parts)):
+                if cp == ct:
+                    common_length += 1
+                else:
+                    break
+            
+            # Prefer candidates that share a common parent with context
+            # e.g., /pets/health shares /pets with /pets/cats
+            if common_length >= len(context_parts) and common_length > best_match_length:
+                best_match_length = common_length
+                best_candidate = candidate
+    
+    return best_candidate
+
+
+def _find_best_parent_for_new_tag(db: Session, tag_name: str, context_paths: set) -> "Tag | None":
+    """
+    Find the best parent tag for a new tag based on context from other tags.
+    If we have 'cats' (path /pets/cats) and add 'food', prefer /pets/food over /others/food.
+    """
+    if not context_paths:
+        return None
+    
+    from utils.tag_utils import tag_processor
+    normalized = tag_processor.normalize(tag_name)
+    
+    # For each context path, try to find a parent that could be a sibling
+    for context_path in context_paths:
+        context_parts = context_path.strip("/").split("/")
+        
+        if len(context_parts) >= 2:
+            # Get the parent path (e.g., /pets from /pets/cats)
+            parent_path = "/".join(context_parts[:-1])
+            parent_tag = db.query(Tag).filter(Tag.path == f"/{parent_path}").first()
+            if parent_tag:
+                return parent_tag
+        
+        # Also check if first part could be a root
+        if len(context_parts) >= 1:
+            root_name = context_parts[0]
+            root_tag = db.query(Tag).filter(
+                Tag.path == f"/{root_name}",
+                Tag.parent_id.is_(None)
+            ).first()
+            if root_tag:
+                return root_tag
+    
+    return None
 
 
 # --- ENDPOINT 2: Upload Image ---
