@@ -180,28 +180,36 @@ def flatten_all_tags(node) -> list[str]:
 def flatten_hierarchy(topic_key: str, hierarchy: dict) -> list[str]:
     """
     Flatten a specific branch of the hierarchy.
-
-    Args:
-        topic_key: Key to look up in the hierarchy
-        hierarchy: Full hierarchy dictionary
-
-    Returns:
-        Flat list of tags under the specified topic
     """
-    subsections = hierarchy.get(topic_key, [])
+    from utils.tag_utils import get_processor
+    tag_processor = get_processor()
+    topic_norm = tag_processor.normalize(topic_key)
+    
+    target_key = None
+    if isinstance(hierarchy, dict):
+        for k in hierarchy.keys():
+            if tag_processor.normalize(k) == topic_norm:
+                target_key = k
+                break
+                
+    subsections = hierarchy.get(target_key, []) if target_key else []
     flat_list = []
 
-    if isinstance(subsections, dict):
-        for subkey, value in subsections.items():
-            if isinstance(value, list):
-                flat_list.extend(value)
-            elif isinstance(value, dict):
-                # Recursively flatten deeper
-                flat_list.extend(flatten_hierarchy(subkey, {subkey: value}))
-    elif isinstance(subsections, list):
-        flat_list.extend(subsections)
+    def _flatten(node):
+        res = []
+        if isinstance(node, dict):
+            for k, v in node.items():
+                res.append(k)
+                res.extend(_flatten(v))
+        elif isinstance(node, list):
+            for item in node:
+                res.extend(_flatten(item))
+        elif isinstance(node, str):
+            res.append(node)
+        return res
 
-    return flat_list
+    flat_list = _flatten(subsections)
+    return list(dict.fromkeys(tag_processor.normalize(t) for t in flat_list))
 
 
 def build_flat_mapping(node) -> dict[str, list]:

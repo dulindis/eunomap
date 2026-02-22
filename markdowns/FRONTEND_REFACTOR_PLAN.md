@@ -115,3 +115,25 @@ No raw `st.session_state` outside this file.
 - [ ] All API calls via services/api_client.py
 - [ ] Session state isolated
 - [ ] No duplicated tag normalization logic
+
+No logic. No API calls.
+
+
+
+---
+
+### 2️⃣ SERVICE_LAYER_DESIGN_TAG_ENGINE.md
+
+**Save this as `SERVICE_LAYER_DESIGN_TAG_ENGINE.md` in your repo:**
+
+```markdown
+# Tag Engine Service Layer Design  
+## Deterministic, Context-Aware, Hierarchical Tag System
+
+---
+
+# 1. Objective
+
+Centralize all tag-related logic into a single authoritative service layer:
+
+

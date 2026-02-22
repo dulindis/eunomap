@@ -362,7 +362,7 @@ def generate_wiki_page(topic: str, db: Session = Depends(get_db)):
     notes = (
         db.query(Note)
         .join(Note.tags)
-        .filter(Tag.name.in_(relevant_tags))
+        .filter(Tag.label.in_(relevant_tags))
         .distinct()
         .all()
     )
@@ -374,7 +374,7 @@ def generate_wiki_page(topic: str, db: Session = Depends(get_db)):
     }
 
     for note in notes:
-        note_tags = [t.name for t in note.tags]
+        note_tags = [t.label for t in note.tags]
         placed_in_section = False
 
         for sub in subsections:

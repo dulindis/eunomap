@@ -242,6 +242,7 @@ ALIASES = {
     "português": "portuguese",
     "中文": "chinese",
     "urząd skarbowy":"tax office",
+    "urząd pracy":"labor office",
     # =========================================================================
     # Business & General Terms
     # =========================================================================
